@@ -1,16 +1,35 @@
+import { Metadata } from "next"
 import Container from "@/components/Container"
 import { getProducts } from "@/lib/getProducts"
 import { notFound } from "next/navigation"
 import AddToCartButton from "@/components/AddToCartButton"
 
 type Props = {
-  params: Promise<{ id: string }>
+  params: { id: string }
 }
 
-export default async function ProductDetails({ params }: Props) {
-  const { id } = await params
+// ✅ ADD THIS
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const products = await getProducts()
-  const product = products.find((p) => p.id === id)
+  const product = products.find((p) => p.id === params.id)
+
+  if (!product) {
+    return {
+      title: "Product Not Found",
+      description: "This product does not exist.",
+    }
+  }
+
+  return {
+    title: product.name,
+    description: product.description?.slice(0, 150),
+  }
+}
+
+// ✅ KEEP YOUR COMPONENT
+export default async function ProductDetails({ params }: Props) {
+  const products = await getProducts()
+  const product = products.find((p) => p.id === params.id)
 
   if (!product) return notFound()
 
@@ -18,6 +37,7 @@ export default async function ProductDetails({ params }: Props) {
     <main className="py-20 bg-white">
       <Container>
         <div className="grid md:grid-cols-2 gap-14">
+          
           {/* IMAGE SECTION */}
           <div>
             {product.imageUrl ? (
@@ -53,7 +73,6 @@ export default async function ProductDetails({ params }: Props) {
               {product.description}
             </p>
 
-            {/* WHAT IT CAN POWER */}
             {product.powerItems && product.powerItems.length > 0 && (
               <div className="mt-10">
                 <h3 className="font-semibold mb-4">
@@ -70,7 +89,6 @@ export default async function ProductDetails({ params }: Props) {
               </div>
             )}
 
-            {/* SPECS */}
             {product.specs && product.specs.length > 0 && (
               <div className="mt-10">
                 <h3 className="font-semibold mb-4">
