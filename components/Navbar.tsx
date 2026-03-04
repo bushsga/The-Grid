@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Menu, X, ShoppingCart, Sun, Battery, Home, Cpu, Info, Phone } from "lucide-react"
 import Container from "./Container"
@@ -8,7 +8,17 @@ import { useCart } from "@/context/CartContext"
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
   const { totalItems } = useCart()
+
+  // Add scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10)
+    }
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
   const categories = [
     { name: "Portable Power", href: "/products?category=Portable%20Power", icon: Battery },
@@ -18,7 +28,9 @@ export default function Navbar() {
   ]
 
   return (
-    <header className="border-b border-gray-200 w-full bg-white sticky top-0 z-50">
+    <header className={`w-full bg-white transition-all duration-300 ${
+      scrolled ? "sticky top-0 shadow-md z-50" : "sticky top-0 z-50"
+    }`}>
       <Container>
         <div className="flex items-center justify-between py-5">
           {/* Logo */}
@@ -26,7 +38,7 @@ export default function Navbar() {
             THE GRID
           </Link>
 
-          {/* Desktop Navigation - WITH ICONS */}
+          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-6">
             {categories.map((cat) => {
               const Icon = cat.icon

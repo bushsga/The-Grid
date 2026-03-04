@@ -41,7 +41,7 @@ export default function HeroSlideshow() {
         <div
           key={index}
           className={`absolute inset-0 transition-opacity duration-1000 ${
-            index === currentSlide ? "opacity-30" : "opacity-0"
+            index === currentSlide ? "opacity-40" : "opacity-0"
           }`}
         >
           <Image
