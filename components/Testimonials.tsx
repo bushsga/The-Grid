@@ -3,36 +3,31 @@
 import { useState } from "react"
 import Container from "./Container"
 import { Star, ChevronLeft, ChevronRight } from "lucide-react"
-import Image from "next/image"
 
 const testimonials = [
   {
     name: "Dr. Adebayo Ogunlesi",
     role: "Homeowner, Lagos",
     content: "THE GRID installed a complete solar system for my 4-bedroom home. I haven't had a single power outage since. The installation was professional and the team was very knowledgeable.",
-    rating: 5,
-    image: "/images/testimonial-1.jpg" // You'll need to add these images
+    rating: 5
   },
   {
     name: "Mrs. Chioma Okonkwo",
     role: "Business Owner, Abuja",
     content: "Our bakery runs entirely on solar now. The hybrid system THE GRID designed for us handles all our equipment perfectly. Best investment we've made!",
-    rating: 5,
-    image: "/images/testimonial-2.jpg"
+    rating: 5
   },
   {
     name: "Engr. Michael Adeleke",
     role: "Tech Company CEO, Port Harcourt",
     content: "We needed a reliable power solution for our data center. THE GRID delivered beyond our expectations. 24/7 support and monitoring included.",
-    rating: 5,
-    image: "/images/testimonial-3.jpg"
+    rating: 5
   },
   {
     name: "Abu Jamal",
     role: "Chief Imam, Ilorin",
-    content: "Our church now enjoys uninterrupted services thanks to THE GRID. They handled everything from design to installation. Highly recommended!",
-    rating: 5,
-    image: "/images/testimonial-4.jpg"
+    content: "Our mosque now enjoys uninterrupted services thanks to THE GRID. They handled everything from design to installation. Highly recommended!",
+    rating: 5
   }
 ]
 
@@ -69,22 +64,9 @@ export default function Testimonials() {
                 ))}
               </div>
               <p className="text-gray-600 text-sm mb-4">"{testimonial.content}"</p>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gray-300 rounded-full overflow-hidden">
-                  {testimonial.image && (
-                    <Image
-                      src={testimonial.image}
-                      alt={testimonial.name}
-                      width={40}
-                      height={40}
-                      className="object-cover"
-                    />
-                  )}
-                </div>
-                <div>
-                  <h4 className="font-medium text-sm">{testimonial.name}</h4>
-                  <p className="text-xs text-gray-500">{testimonial.role}</p>
-                </div>
+              <div>
+                <h4 className="font-medium text-sm">{testimonial.name}</h4>
+                <p className="text-xs text-gray-500">{testimonial.role}</p>
               </div>
             </div>
           ))}
@@ -99,22 +81,9 @@ export default function Testimonials() {
               ))}
             </div>
             <p className="text-gray-600 text-sm mb-4">"{testimonials[currentIndex].content}"</p>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gray-300 rounded-full overflow-hidden">
-                {testimonials[currentIndex].image && (
-                  <Image
-                    src={testimonials[currentIndex].image}
-                    alt={testimonials[currentIndex].name}
-                    width={40}
-                    height={40}
-                    className="object-cover"
-                  />
-                )}
-              </div>
-              <div>
-                <h4 className="font-medium text-sm">{testimonials[currentIndex].name}</h4>
-                <p className="text-xs text-gray-500">{testimonials[currentIndex].role}</p>
-              </div>
+            <div>
+              <h4 className="font-medium text-sm">{testimonials[currentIndex].name}</h4>
+              <p className="text-xs text-gray-500">{testimonials[currentIndex].role}</p>
             </div>
           </div>
 
