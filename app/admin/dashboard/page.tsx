@@ -1,11 +1,13 @@
 import Container from "@/components/Container"
+import StockAlertBanner from "@/components/StockAlertBanner"
 import Link from "next/link"
 
 export default function AdminDashboard() {
   return (
     <Container>
       <h1 className="text-3xl font-semibold mb-8">Admin Dashboard</h1>
-
+       <StockAlertBanner />
+       
       <div className="grid md:grid-cols-3 gap-6">
         {/* Products Card */}
         <Link href="/admin/products">

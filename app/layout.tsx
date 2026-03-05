@@ -2,6 +2,7 @@ import "./globals.css"
 import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
 import { CartProvider } from "@/context/CartContext"
+import { Toaster } from 'react-hot-toast'
 import { Inter, Playfair_Display } from "next/font/google"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
@@ -24,6 +25,7 @@ export default function RootLayout({
           <Navbar />
           {/* Add padding-top to account for fixed navbar */}
           <div className="pt-18.25">
+            <Toaster position="top-right" />
             {children}
           </div>
           <Footer />

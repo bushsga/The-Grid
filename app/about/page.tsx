@@ -1,31 +1,41 @@
 import Container from "@/components/Container"
-import { Zap, Shield, Clock, Heart } from "lucide-react"
+import { Zap, Shield, Clock, Heart, Target, Eye } from "lucide-react"
 import Link from "next/link"
-import Image from "next/image"
 
 export default function AboutPage() {
   return (
     <main className="py-20 bg-white">
       <Container>
-        {/* Hero with Image */}
-        <div className="grid md:grid-cols-2 gap-12 items-center mb-20">
-          <div>
-            <h1 className="text-4xl sm:text-5xl font-semibold mb-6">
-              Powering Nigeria's Future
-            </h1>
-            <p className="text-gray-600 text-lg">
-              THE GRID is Nigeria's premier solar and power solutions provider,
-              delivering premium energy independence to homes and businesses since 2020.
+        {/* Hero */}
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <h1 className="text-4xl sm:text-5xl font-semibold mb-6">
+            About THE GRID
+          </h1>
+          <p className="text-gray-600 text-lg">
+            Nigeria's most trusted hub for modern, reliable energy and smart technology.
+          </p>
+        </div>
+
+        {/* Vision & Mission */}
+        <div className="grid md:grid-cols-2 gap-8 mb-20">
+          <div className="bg-gray-50 p-8 rounded-sm">
+            <Eye className="w-12 h-12 text-[#C8A75B] mb-4" />
+            <h2 className="text-2xl font-semibold mb-4">Our Vision</h2>
+            <p className="text-gray-700 leading-relaxed">
+              To be Nigeria's most trusted hub for modern, reliable energy and smart technology, 
+              empowering homes and businesses to thrive without limits.
             </p>
           </div>
-          
-          {/* About Image - solar-4.png */}
-          <div className="h-80 bg-gray-200 w-full relative overflow-hidden rounded-sm">
-            <img 
-              src="/images/solar-4.jpg" 
-              alt="Solar Installation" 
-              className="w-full h-full object-cover"
-            />
+
+          <div className="bg-gray-50 p-8 rounded-sm">
+            <Target className="w-12 h-12 text-[#C8A75B] mb-4" />
+            <h2 className="text-2xl font-semibold mb-4">Our Mission</h2>
+            <p className="text-gray-700 leading-relaxed">
+              To completely eliminate the stress of power outages and high fuel costs by providing 
+              premium, budget-friendly solar solutions and high-quality tech gadgets. At THE GRID, 
+              we are dedicated to delivering zero noise, zero fuel, and 100% peace of mind through 
+              expert installations, nationwide accessibility, and unmatched customer service.
+            </p>
           </div>
         </div>
 
@@ -49,44 +59,11 @@ export default function AboutPage() {
           </div>
         </div>
 
-        {/* Mission & Values */}
-        <div className="grid md:grid-cols-2 gap-12 mb-20">
-          <div>
-            <h2 className="text-2xl font-semibold mb-6">Our Mission</h2>
-            <p className="text-gray-600 mb-4">
-              To provide reliable, affordable, and sustainable solar energy solutions
-              that empower Nigerian homes and businesses to thrive without grid dependency.
-            </p>
-            <p className="text-gray-600">
-              We believe in a future where clean energy is accessible to all,
-              and we're building the infrastructure to make it happen.
-            </p>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-gray-50 p-4 text-center">
-              <Zap className="w-8 h-8 text-[#C8A75B] mx-auto mb-2" />
-              <h3 className="font-medium">Fast Installation</h3>
-            </div>
-            <div className="bg-gray-50 p-4 text-center">
-              <Shield className="w-8 h-8 text-[#C8A75B] mx-auto mb-2" />
-              <h3 className="font-medium">5-Year Warranty</h3>
-            </div>
-            <div className="bg-gray-50 p-4 text-center">
-              <Clock className="w-8 h-8 text-[#C8A75B] mx-auto mb-2" />
-              <h3 className="font-medium">24/7 Support</h3>
-            </div>
-            <div className="bg-gray-50 p-4 text-center">
-              <Heart className="w-8 h-8 text-[#C8A75B] mx-auto mb-2" />
-              <h3 className="font-medium">Customer First</h3>
-            </div>
-          </div>
-        </div>
-
         {/* CTA */}
         <div className="text-center bg-gray-50 p-12">
-          <h2 className="text-2xl font-semibold mb-4">Ready to Go Solar?</h2>
+          <h2 className="text-2xl font-semibold mb-4">Ready to Join The Grid?</h2>
           <p className="text-gray-600 mb-6">
-            Join hundreds of satisfied customers enjoying clean, reliable power.
+            Experience uninterrupted power and energy independence today.
           </p>
           <Link href="/contact">
             <button className="bg-[#C8A75B] text-black px-8 py-3 font-medium hover:bg-[#b8964a] transition">

@@ -53,6 +53,11 @@ export default function CheckoutPage() {
         })
         
         console.log(`✅ Stock updated for ${productId}: ${currentStock} → ${newStock}`)
+        
+        // Check if stock is now low and alert (can be expanded later)
+        if (newStock < 10) {
+          console.log(`⚠️ Low stock alert for ${productSnap.data().name}: ${newStock} units left`)
+        }
       }
     } catch (error) {
       console.error("❌ Error updating stock:", error)
@@ -91,7 +96,7 @@ export default function CheckoutPage() {
       const docRef = await addDoc(collection(db, "orders"), orderData)
       console.log("✅ Order saved with ID:", docRef.id)
       
-      // Update inventory for each product
+      // Update inventory for each product - THIS IS THE FIX FOR STOCK UPDATES
       for (const item of items) {
         await updateProductStock(item.product.id, item.quantity)
       }
@@ -101,10 +106,10 @@ export default function CheckoutPage() {
       
     } catch (error) {
       console.error("❌ Error saving order:", error)
+      alert("There was an error processing your order. Please contact support.")
     }
   }
 
-  // This function now receives the response from Paystack
   const handlePaymentSuccess = (response: any) => {
     console.log("💰 Payment successful!", response)
     saveOrderToFirebase(response.reference)

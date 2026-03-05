@@ -99,46 +99,82 @@ export default async function Home() {
         </Container>
       </section>
 
-      {/* INSTALLATION SHOWCASE */}
-{/* INSTALLATION SHOWCASE */}
+ {/* WHY CHOOSE US SECTION - REPLACES INSTALLATION SHOWCASE */}
 <section className="py-24 bg-white">
   <Container>
-    <div className="grid md:grid-cols-2 gap-12 items-center">
-      
-      <div>
-        <h2 className="text-3xl font-semibold">
-          Professional Solar Installation
-        </h2>
+    <div className="text-center mb-12">
+      <h2 className="text-3xl font-semibold">Why Choose THE GRID</h2>
+      <p className="text-gray-600 mt-3 max-w-xl mx-auto">
+        We don't just sell equipment; we sell the comfort of uninterrupted power.
+      </p>
+    </div>
 
-        <p className="mt-6 text-gray-600 leading-relaxed">
-          Our certified engineers design and install high-performance
-          solar systems tailored to your energy needs. From luxury homes
-          to corporate offices, we deliver clean, uninterrupted power.
-        </p>
+    <div className="grid md:grid-cols-2 gap-8">
+      {/* Left side - Image */}
+      <div className="h-96 bg-gray-200 w-full rounded-sm overflow-hidden">
+        <img 
+          src="/images/solar-5.jpg" 
+          alt="Solar Installation"
+          className="w-full h-full object-cover"
+        />
+      </div>
 
-        <ul className="mt-6 space-y-3 text-sm text-gray-700">
-          <li>✔ Site inspection & energy audit</li>
-          <li>✔ Premium components</li>
-          <li>✔ Structured wiring & safety compliance</li>
-          <li>✔ Post-installation technical support</li>
-        </ul>
+      {/* Right side - Why Choose Us points */}
+      <div className="space-y-6">
+        <div className="flex gap-4">
+          <div className="w-12 h-12 bg-[#C8A75B]/10 rounded-full flex items-center justify-center flex-shrink-0">
+            <span className="text-[#C8A75B] text-xl">✓</span>
+          </div>
+          <div>
+            <h3 className="text-xl font-semibold mb-2">Reliability (Tested & Trusted)</h3>
+            <p className="text-gray-600">
+              We only stock and install products guaranteed to deliver long-term performance.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex gap-4">
+          <div className="w-12 h-12 bg-[#C8A75B]/10 rounded-full flex items-center justify-center flex-shrink-0">
+            <span className="text-[#C8A75B] text-xl">✓</span>
+          </div>
+          <div>
+            <h3 className="text-xl font-semibold mb-2">Excellence</h3>
+            <p className="text-gray-600">
+              From our neat, modern installations to our high-end showroom, we maintain premium standards in everything we do.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex gap-4">
+          <div className="w-12 h-12 bg-[#C8A75B]/10 rounded-full flex items-center justify-center flex-shrink-0">
+            <span className="text-[#C8A75B] text-xl">✓</span>
+          </div>
+          <div>
+            <h3 className="text-xl font-semibold mb-2">Accessibility</h3>
+            <p className="text-gray-600">
+              Distance is never a barrier; we ensure fast, secure, and guaranteed nationwide delivery.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex gap-4">
+          <div className="w-12 h-12 bg-[#C8A75B]/10 rounded-full flex items-center justify-center flex-shrink-0">
+            <span className="text-[#C8A75B] text-xl">✓</span>
+          </div>
+          <div>
+            <h3 className="text-xl font-semibold mb-2">Customer Peace of Mind</h3>
+            <p className="text-gray-600">
+              We don't just sell equipment; we sell the comfort of uninterrupted power and zero generator stress.
+            </p>
+          </div>
+        </div>
 
         <Link href="/contact">
-          <button className="mt-8 bg-[#C8A75B] text-black px-6 py-3 text-sm font-medium">
+          <button className="mt-6 bg-[#C8A75B] text-black px-8 py-3 text-sm font-medium hover:bg-[#b8964a] transition">
             Book Installation
           </button>
         </Link>
       </div>
-
-      {/* Image Side - NOW WITH solar-5.jpg */}
-      <div className="h-80 bg-gray-200 w-full relative overflow-hidden rounded-sm">
-        <img 
-          src="/images/solar-5.jpg" 
-          alt="Solar Installation" 
-          className="w-full h-full object-cover"
-        />
-      </div>
-      
     </div>
   </Container>
 </section>

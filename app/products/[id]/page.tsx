@@ -1,35 +1,16 @@
-import { Metadata } from "next"
 import Container from "@/components/Container"
 import { getProducts } from "@/lib/getProducts"
 import { notFound } from "next/navigation"
 import AddToCartButton from "@/components/AddToCartButton"
 
 type Props = {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
-// ✅ ADD THIS
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const products = await getProducts()
-  const product = products.find((p) => p.id === params.id)
-
-  if (!product) {
-    return {
-      title: "Product Not Found",
-      description: "This product does not exist.",
-    }
-  }
-
-  return {
-    title: product.name,
-    description: product.description?.slice(0, 150),
-  }
-}
-
-// ✅ KEEP YOUR COMPONENT
 export default async function ProductDetails({ params }: Props) {
+  const { id } = await params
   const products = await getProducts()
-  const product = products.find((p) => p.id === params.id)
+  const product = products.find((p) => p.id === id)
 
   if (!product) return notFound()
 
@@ -37,21 +18,24 @@ export default async function ProductDetails({ params }: Props) {
     <main className="py-20 bg-white">
       <Container>
         <div className="grid md:grid-cols-2 gap-14">
-          
-          {/* IMAGE SECTION */}
+          {/* IMAGE SECTION - TALLER CONTAINER */}
           <div>
-            {product.imageUrl ? (
-              <img 
-                src={product.imageUrl} 
-                alt={product.name}
-                className="h-96 w-full object-cover rounded-sm"
-              />
-            ) : (
-              <div className="h-96 bg-gray-200 w-full rounded-sm" />
-            )}
+            <div className="w-full h-[500px] bg-gray-50 overflow-hidden"> {/* ← Increased from h-96 to h-[500px] */}
+              {product.imageUrl ? (
+                <img 
+                  src={product.imageUrl} 
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <span className="text-gray-400">No image available</span>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* PRODUCT INFO */}
+          {/* PRODUCT INFO - rest same */}
           <div>
             <div className="inline-block bg-[#C8A75B]/20 text-[#C8A75B] text-xs px-3 py-1 mb-4">
               Installation Included
@@ -69,16 +53,21 @@ export default async function ProductDetails({ params }: Props) {
               ₦{product.price.toLocaleString()}
             </div>
 
+            <div className="mt-2 text-sm text-gray-600">
+              {product.stock > 0 ? (
+                <span>{product.stock} units available</span>
+              ) : (
+                <span className="text-red-600">Out of Stock</span>
+              )}
+            </div>
+
             <p className="mt-6 text-gray-700 leading-relaxed">
               {product.description}
             </p>
 
             {product.powerItems && product.powerItems.length > 0 && (
               <div className="mt-10">
-                <h3 className="font-semibold mb-4">
-                  What It Can Power
-                </h3>
-
+                <h3 className="font-semibold mb-4">What It Can Power</h3>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   {product.powerItems.map((item: any, index: number) => (
                     <div key={index} className="border p-3">
@@ -91,10 +80,7 @@ export default async function ProductDetails({ params }: Props) {
 
             {product.specs && product.specs.length > 0 && (
               <div className="mt-10">
-                <h3 className="font-semibold mb-4">
-                  Technical Specifications
-                </h3>
-
+                <h3 className="font-semibold mb-4">Technical Specifications</h3>
                 <div className="border divide-y text-sm">
                   {product.specs.map((spec: any, index: number) => (
                     <div key={index} className="flex justify-between p-3">
