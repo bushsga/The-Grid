@@ -11,7 +11,6 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const { totalItems } = useCart()
 
-  // Add scroll effect
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10)
@@ -28,11 +27,14 @@ export default function Navbar() {
   ]
 
   return (
-    <header className={`w-full bg-white transition-all duration-300 ${
-      scrolled ? "sticky top-0 shadow-md z-50" : "sticky top-0 z-50"
-    }`}>
+    <header 
+      className={`
+        fixed top-0 left-0 right-0 w-full bg-white transition-all duration-300 z-100
+        ${scrolled ? "shadow-lg" : "shadow-sm"}
+      `}
+    >
       <Container>
-        <div className="flex items-center justify-between py-5">
+        <div className="flex items-center justify-between py-4">
           {/* Logo */}
           <Link href="/" className="text-xl font-semibold tracking-wide">
             THE GRID

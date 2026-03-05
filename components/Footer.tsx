@@ -47,7 +47,7 @@ export default function Footer() {
               <a href="#" className="text-gray-400 hover:text-[#C8A75B] transition">
                 <Twitter className="w-5 h-5" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-[#C8A75B] transition">
+              <a href="https://www.instagram.com/thegridsolartech/?utm_source=ig_web_button_share_sheet" className="text-gray-400 hover:text-[#C8A75B] transition">
                 <Instagram className="w-5 h-5" />
               </a>
             </div>

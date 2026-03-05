@@ -4,17 +4,8 @@ import Footer from "@/components/Footer"
 import { CartProvider } from "@/context/CartContext"
 import { Inter, Playfair_Display } from "next/font/google"
 
-// Modern sans-serif for body text
-const inter = Inter({ 
-  subsets: ["latin"],
-  variable: "--font-inter",
-})
-
-// Elegant serif for headings
-const playfair = Playfair_Display({ 
-  subsets: ["latin"],
-  variable: "--font-playfair",
-})
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
+const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" })
 
 export const metadata = {
   title: "THE GRID - Premium Solar Power Solutions",
@@ -31,7 +22,10 @@ export default function RootLayout({
       <body className="font-sans">
         <CartProvider>
           <Navbar />
-          {children}
+          {/* Add padding-top to account for fixed navbar */}
+          <div className="pt-18.25">
+            {children}
+          </div>
           <Footer />
         </CartProvider>
       </body>
