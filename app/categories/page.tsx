@@ -1,39 +1,43 @@
 import Container from "@/components/Container"
 import Link from "next/link"
 import { Battery, Home, Sun, Cpu, ArrowRight } from "lucide-react"
+import { getProducts } from "@/lib/getProducts"
 
-const categories = [
-  {
-    name: "Portable Power",
-    slug: "Portable Power",
-    description: "Power banks, solar generators, and portable stations for on-the-go energy",
-    icon: Battery,
-    productCount: 12
-  },
-  {
-    name: "Home Backup",
-    slug: "Home Backup",
-    description: "Complete home backup systems, inverters, and battery storage solutions",
-    icon: Home,
-    productCount: 8
-  },
-  {
-    name: "Solar Panels",
-    slug: "Solar Panels",
-    description: "High-efficiency solar panels for residential and commercial use",
-    icon: Sun,
-    productCount: 15
-  },
-  {
-    name: "Smart Tech",
-    slug: "Smart Tech",
-    description: "Smart home devices, security systems, and energy monitors",
-    icon: Cpu,
-    productCount: 10
-  }
-]
+export default async function CategoriesPage() {
+  const products = await getProducts()
+  
+  // Calculate real product counts for each category
+  const categories = [
+    {
+      name: "Portable Power",
+      slug: "Portable Power",
+      description: "Power banks, solar generators, and portable stations for on-the-go energy",
+      icon: Battery,
+      productCount: products.filter(p => p.category === "Portable Power").length
+    },
+    {
+      name: "Home Backup",
+      slug: "Home Backup",
+      description: "Complete home backup systems, inverters, and battery storage solutions",
+      icon: Home,
+      productCount: products.filter(p => p.category === "Home Backup").length
+    },
+    {
+      name: "Solar Panels",
+      slug: "Solar Panels",
+      description: "High-efficiency solar panels for residential and commercial use",
+      icon: Sun,
+      productCount: products.filter(p => p.category === "Solar Panels").length
+    },
+    {
+      name: "Smart Tech",
+      slug: "Smart Tech",
+      description: "Smart home devices, security systems, and energy monitors",
+      icon: Cpu,
+      productCount: products.filter(p => p.category === "Smart Tech").length
+    }
+  ]
 
-export default function CategoriesPage() {
   return (
     <main className="py-20 bg-gray-50 min-h-screen">
       <Container>
@@ -71,7 +75,7 @@ export default function CategoriesPage() {
                     </p>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-500">
-                        {category.productCount} products
+                        {category.productCount} product{category.productCount !== 1 ? 's' : ''}
                       </span>
                       <span className="text-[#C8A75B] font-medium flex items-center gap-1 group-hover:gap-2 transition-all">
                         Browse Category <ArrowRight className="w-4 h-4" />
