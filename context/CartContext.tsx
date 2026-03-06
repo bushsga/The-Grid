@@ -1,8 +1,8 @@
 "use client"
 
 import React, { createContext, useContext, useEffect, useState } from "react"
-import toast from 'react-hot-toast'
 import { Product } from "@/types/product"
+import toast from 'react-hot-toast'
 
 type CartItem = {
   product: Product
@@ -24,6 +24,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined)
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([])
 
+  // Load cart from localStorage on first render
   useEffect(() => {
     const savedCart = localStorage.getItem("cart")
     if (savedCart) {
@@ -35,39 +36,66 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
+  // Save cart to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(items))
   }, [items])
 
-const addToCart = (product: Product) => {
-  if (product.stock <= 0) {
-    toast.error("This product is out of stock")
-    return { success: false }
-  }
+  const addToCart = (product: Product) => {
+    // Check if product is in stock
+    if (product.stock <= 0) {
+      toast.error("This product is out of stock")
+      return { success: false, message: "This product is out of stock" }
+    }
 
-  setItems(currentItems => {
-    const existingItem = currentItems.find(item => item.product.id === product.id)
+    // Check if product already in cart
+    const existingItem = items.find(item => item.product.id === product.id)
     
     if (existingItem) {
+      // Check if adding one more would exceed stock
       if (existingItem.quantity + 1 > product.stock) {
-        toast.error(`Only ${product.stock} units available`)
-        return currentItems
+        toast.error(`Sorry, only ${product.stock} units available`)
+        return { success: false, message: `Only ${product.stock} units available` }
       }
       
-      toast.success(`${product.name} quantity updated in cart`)
-      return currentItems.map(item =>
-        item.product.id === product.id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
+      // Update quantity
+      setItems(currentItems =>
+        currentItems.map(item =>
+          item.product.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        )
       )
+      
+      // Show toast AFTER state update
+      setTimeout(() => {
+        toast.success(`${product.name} quantity updated in cart`)
+      }, 100)
+      
+      return { success: true }
     } else {
-      toast.success(`${product.name} added to cart`)
-      return [...currentItems, { product, quantity: 1 }]
+      // Add new item
+      setItems([...items, { product, quantity: 1 }])
+      
+      // Show toast AFTER state update
+      setTimeout(() => {
+        toast.success(`${product.name} added to cart`)
+      }, 100)
+      
+      return { success: true }
     }
-  })
-  
-  return { success: true }
-}
+  }
+
+  const removeFromCart = (productId: string) => {
+    const product = items.find(item => item.product.id === productId)?.product
+    setItems(currentItems => currentItems.filter(item => item.product.id !== productId))
+    
+    if (product) {
+      setTimeout(() => {
+        toast.success(`${product.name} removed from cart`)
+      }, 100)
+    }
+  }
 
   const updateQuantity = (productId: string, quantity: number) => {
     const item = items.find(i => i.product.id === productId)
@@ -78,7 +106,7 @@ const addToCart = (product: Product) => {
 
     // Check if requested quantity exceeds stock
     if (quantity > item.product.stock) {
-      alert(`Sorry, only ${item.product.stock} units available`)
+      toast.error(`Sorry, only ${item.product.stock} units available`)
       return { success: false, message: "Exceeds available stock" }
     }
 
@@ -93,15 +121,18 @@ const addToCart = (product: Product) => {
       )
     )
     
+    setTimeout(() => {
+      toast.success(`${item.product.name} quantity updated`)
+    }, 100)
+    
     return { success: true }
-  }
-
-  const removeFromCart = (productId: string) => {
-    setItems(currentItems => currentItems.filter(item => item.product.id !== productId))
   }
 
   const clearCart = () => {
     setItems([])
+    setTimeout(() => {
+      toast.success("Cart cleared")
+    }, 100)
   }
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)

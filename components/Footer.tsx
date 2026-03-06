@@ -1,6 +1,7 @@
 import Link from "next/link"
 import Container from "./Container"
-import { Facebook, Twitter, Instagram, Mail, Phone, MapPin } from "lucide-react"
+import { Facebook, Instagram, Mail, Phone, MapPin } from "lucide-react"
+
 
 export default function Footer() {
   const currentYear = new Date().getFullYear()
@@ -19,13 +20,6 @@ export default function Footer() {
     { name: "Calculator", href: "/calculator" },
   ]
 
-  const supportLinks = [
-    { name: "FAQ", href: "/faq" },
-    { name: "Warranty", href: "/warranty" },
-    { name: "Privacy Policy", href: "/privacy" },
-    { name: "Terms", href: "/terms" },
-  ]
-
   return (
     <footer className="bg-[#0B0F19] text-white mt-20">
       <Container>
@@ -41,11 +35,8 @@ export default function Footer() {
               Nigeria's premier solar power solutions provider. Delivering clean, reliable energy to homes and businesses nationwide.
             </p>
             <div className="flex gap-4">
-              <a href="#" className="text-gray-400 hover:text-[#C8A75B] transition">
+              <a href="https://www.facebook.com/profile.php?id=61586539686519" className="text-gray-400 hover:text-[#C8A75B] transition">
                 <Facebook className="w-5 h-5" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-[#C8A75B] transition">
-                <Twitter className="w-5 h-5" />
               </a>
               <a href="https://www.instagram.com/thegridsolartech/?utm_source=ig_web_button_share_sheet" className="text-gray-400 hover:text-[#C8A75B] transition">
                 <Instagram className="w-5 h-5" />

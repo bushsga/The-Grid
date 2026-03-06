@@ -77,7 +77,7 @@ export default function HeroSlideshow() {
           </p>
 
           <div className="mt-10 flex flex-col sm:flex-row gap-4">
-            <Link href="/products">
+            <Link href="/categories">
               <button className="bg-[#C8A75B] text-black px-8 py-4 text-sm font-medium w-full sm:w-auto hover:bg-[#b8964a] transition">
                 Shop Products
               </button>
