@@ -30,12 +30,12 @@ export default function AdminLogin() {
   }
 
   return (
-    <main className="py-20 bg-white min-h-screen">
+    <main className="min-h-screen bg-gray-50 flex items-center justify-center py-12">
       <Container>
         <div className="max-w-md mx-auto">
           <h1 className="text-3xl font-semibold mb-8 text-center">Admin Login</h1>
           
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4 bg-white p-8 shadow-sm">
             {error && (
               <div className="bg-red-50 text-red-500 p-3 text-sm">
                 {error}
