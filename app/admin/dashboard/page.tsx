@@ -1,10 +1,12 @@
 import Container from "@/components/Container"
 import StockAlertBanner from "@/components/StockAlertBanner"
 import Link from "next/link"
+import AdminProtected from "@/components/AdminProtected"
 
 export default function AdminDashboard() {
   return (
-    <Container>
+    <AdminProtected>
+          <Container>
       <h1 className="text-3xl font-semibold mb-8">Admin Dashboard</h1>
        <StockAlertBanner />
        
@@ -37,5 +39,6 @@ export default function AdminDashboard() {
         </Link>
       </div>
     </Container>
+    </AdminProtected>
   )
 }

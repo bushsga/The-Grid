@@ -7,6 +7,7 @@ import { collection, addDoc } from "firebase/firestore"
 import Container from "@/components/Container"
 import CloudinaryUpload from "@/components/CloudinaryUpload"
 import { Plus, Trash2 } from "lucide-react"
+import AdminProtected from "@/components/AdminProtected"
 
 export default function AddProduct() {
   const router = useRouter()
@@ -121,7 +122,8 @@ export default function AddProduct() {
   }
 
   return (
-    <Container>
+    <AdminProtected>
+         <Container>
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-semibold">Add New Product</h1>
         <button
@@ -338,5 +340,6 @@ export default function AddProduct() {
         </button>
       </form>
     </Container>
+    </AdminProtected> 
   )
 }

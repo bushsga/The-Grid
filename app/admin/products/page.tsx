@@ -7,6 +7,7 @@ import Link from "next/link"
 import Container from "@/components/Container"
 import { useRouter } from "next/navigation"
 import { Edit, Trash2, Package, Plus } from "lucide-react"
+import AdminProtected from "@/components/AdminProtected"
 
 type Product = {
   id: string
@@ -158,7 +159,8 @@ export default function ProductsPage() {
   }
 
   return (
-    <Container>
+    <AdminProtected>
+           <Container>
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-semibold">Products Management</h1>
         <Link
@@ -447,5 +449,6 @@ export default function ProductsPage() {
         </div>
       )}
     </Container>
+    </AdminProtected>
   )
 }

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { db } from "@/lib/firebase"
 import { collection, getDocs, doc, updateDoc } from "firebase/firestore"
 import Container from "@/components/Container"
+import AdminProtected from "@/components/AdminProtected"
 
 type Order = {
   id: string
@@ -118,7 +119,8 @@ export default function OrdersPage() {
   }
 
   return (
-    <Container>
+    <AdminProtected>
+          <Container>
       <h1 className="text-3xl font-semibold mb-8">Orders Management</h1>
 
       {/* Filter */}
@@ -247,5 +249,6 @@ export default function OrdersPage() {
         </div>
       )}
     </Container>
+    </AdminProtected>
   )
 }
