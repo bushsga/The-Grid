@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { db } from "@/lib/firebase"
-import { collection, getDocs, doc, updateDoc } from "firebase/firestore"
+import { collection, getDocs, doc, updateDoc, deleteDoc } from "firebase/firestore"
 import Container from "@/components/Container"
-import AdminProtected from "@/components/AdminProtected"
 
 type Order = {
   id: string
@@ -64,7 +63,7 @@ export default function OrdersPage() {
         orderStatus: newStatus,
         updatedAt: new Date()
       })
-      fetchOrders() // Refresh list
+      fetchOrders()
       alert(`Order status updated to ${newStatus}`)
     } catch (error) {
       console.error("Error updating order:", error)
@@ -82,7 +81,7 @@ export default function OrdersPage() {
       const orderRef = doc(db, "orders", orderId)
       await updateDoc(orderRef, {
         waybill: waybillInput,
-        orderStatus: "shipped", // Auto-update to shipped when waybill added
+        orderStatus: "shipped",
         updatedAt: new Date()
       })
       setWaybillInput("")
@@ -92,6 +91,23 @@ export default function OrdersPage() {
     } catch (error) {
       console.error("Error updating waybill:", error)
       alert("Failed to update waybill")
+    }
+  }
+
+  // ✅ NEW: Delete order function
+  const deleteOrder = async (orderId: string) => {
+    if (!confirm("Are you sure you want to delete this order? This action cannot be undone.")) {
+      return
+    }
+
+    try {
+      const orderRef = doc(db, "orders", orderId)
+      await deleteDoc(orderRef)
+      fetchOrders()
+      alert("Order deleted successfully")
+    } catch (error) {
+      console.error("Error deleting order:", error)
+      alert("Failed to delete order")
     }
   }
 
@@ -119,8 +135,7 @@ export default function OrdersPage() {
   }
 
   return (
-    <AdminProtected>
-          <Container>
+    <Container>
       <h1 className="text-3xl font-semibold mb-8">Orders Management</h1>
 
       {/* Filter */}
@@ -214,6 +229,16 @@ export default function OrdersPage() {
                       + Waybill
                     </button>
                   )}
+
+                  {/* ✅ DELETE BUTTON - Only for delivered orders */}
+                  {order.orderStatus === "delivered" && (
+                    <button
+                      onClick={() => deleteOrder(order.id)}
+                      className="bg-red-500 text-white px-3 py-2 text-sm rounded-sm hover:bg-red-600"
+                    >
+                      Delete
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -249,6 +274,5 @@ export default function OrdersPage() {
         </div>
       )}
     </Container>
-    </AdminProtected>
   )
 }

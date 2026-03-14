@@ -95,12 +95,12 @@ export default function ContactPage() {
           <div className="text-center p-6 bg-gray-50">
             <Mail className="w-8 h-8 text-[#C8A75B] mx-auto mb-3" />
             <h3 className="font-medium mb-2">Email Us</h3>
-            <p className="text-gray-600">hello@thegrid.ng</p>
+            <p className="text-gray-600">gridsolar98@gmail.com</p>
           </div>
           <div className="text-center p-6 bg-gray-50">
             <MapPin className="w-8 h-8 text-[#C8A75B] mx-auto mb-3" />
             <h3 className="font-medium mb-2">Visit Us</h3>
-            <p className="text-gray-600">Lagos, Nigeria</p>
+            <p className="text-gray-600">Kwara, Nigeria</p>
           </div>
         </div>
 

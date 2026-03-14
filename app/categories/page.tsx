@@ -6,7 +6,6 @@ import { getProducts } from "@/lib/getProducts"
 export default async function CategoriesPage() {
   const products = await getProducts()
   
-  // Calculate real product counts for each category
   const categories = [
     {
       name: "Portable Power",

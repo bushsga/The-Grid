@@ -27,7 +27,6 @@ export default function CalculatorPage() {
       return sum + (item.watts * item.hours * item.quantity)
     }, 0)
     
-    // Convert to kWh and add 20% safety margin
     const systemSize = (totalWh / 1000) * 1.2
     setResult(Math.ceil(systemSize))
   }

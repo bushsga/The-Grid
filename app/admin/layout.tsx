@@ -17,13 +17,11 @@ export default function AdminLayout({
   const router = useRouter()
   const pathname = usePathname()
   
-  // Check if current page is login page
   const isLoginPage = pathname === "/admin/login"
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user && !isLoginPage) {
-        // Only redirect if not on login page
         router.push("/admin/login")
       } else {
         setUser(user)
@@ -44,7 +42,6 @@ export default function AdminLayout({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Only show navbar if user is logged in AND not on login page */}
       {user && !isLoginPage && (
         <nav className="bg-[#0B0F19] text-white sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-4">

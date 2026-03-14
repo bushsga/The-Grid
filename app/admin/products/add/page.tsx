@@ -91,7 +91,6 @@ export default function AddProduct() {
     setLoading(true)
 
     try {
-      // Filter out empty power items and specs
       const filteredPowerItems = powerItems.filter(p => p.item.trim() && p.hours.trim())
       const filteredSpecs = specs.filter(s => s.label.trim() && s.value.trim())
 

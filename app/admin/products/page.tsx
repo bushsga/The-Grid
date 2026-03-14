@@ -103,7 +103,7 @@ export default function ProductsPage() {
     try {
       let imageUrl = editingProduct.imageUrl
       
-      // Upload new image if selected
+      
       if (newImageFile) {
         setUploadingImage(true)
         const formData = new FormData()

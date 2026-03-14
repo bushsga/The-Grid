@@ -13,18 +13,13 @@ export const metadata = {
   description: "Nigeria's premier solar energy company.",
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
       <body className="font-sans">
         <CartProvider>
           <Navbar />
-          {/* Add padding-top to account for fixed navbar */}
-          <div className="pt-18.25">
+          <div className="pt-[73px]">
             <Toaster position="top-right" />
             {children}
           </div>

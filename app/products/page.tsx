@@ -12,12 +12,11 @@ export default async function ProductsPage({ searchParams }: Props) {
   const { category } = await searchParams
   const allProducts = await getProducts()
   
-  // Filter products by category if specified
   const products = category 
     ? allProducts.filter(p => p.category === category)
     : allProducts
 
-  // If no category selected, show message to select category
+  
   if (!category) {
     return (
       <main className="py-20 bg-gray-50 min-h-screen">
@@ -39,7 +38,6 @@ export default async function ProductsPage({ searchParams }: Props) {
     )
   }
 
-  // Get category name for display
   const categoryName = category
 
   return (
