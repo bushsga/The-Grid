@@ -1,6 +1,9 @@
 "use client"
 
 import { useState } from "react"
+import { db } from "@/lib/firebase"
+import { collection, addDoc } from "firebase/firestore"
+import { useCart } from "@/context/CartContext"
 
 type Props = {
   email: string
@@ -13,17 +16,52 @@ type Props = {
 
 export default function MonnifyPayment({ email, fullName, phone, amount, onSuccess, onClose }: Props) {
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const { items, clearCart } = useCart()
+
+  const saveOrderToFirebase = async (reference: string) => {
+    try {
+      const orderData = {
+        customer: {
+          name: fullName,
+          email: email,
+          phone: phone
+        },
+        items: items.map(item => ({
+          productId: item.product.id,
+          name: item.product.name,
+          price: item.product.price,
+          quantity: item.quantity,
+          total: item.product.price * item.quantity
+        })),
+        totalAmount: amount,
+        paymentReference: reference,
+        paymentStatus: "pending",
+        orderStatus: "processing",
+        waybill: "",
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+
+      const docRef = await addDoc(collection(db, "orders"), orderData)
+      console.log("✅ Order saved with reference:", reference, "ID:", docRef.id)
+      return docRef.id
+    } catch (error) {
+      console.error("❌ Error saving order:", error)
+      throw error
+    }
+  }
 
   const handlePayment = async () => {
     setLoading(true)
-    setError(null)
     
+    // Generate reference BEFORE saving
     const reference = `GRID-${Date.now()}-${Math.floor(Math.random() * 1000)}`
     
     try {
-      console.log("🚀 Starting payment with reference:", reference)
+      // 1️⃣ SAVE ORDER FIRST (with pending status)
+      await saveOrderToFirebase(reference)
       
+      // 2️⃣ THEN initialize payment with Monnify
       const res = await fetch("/api/monnify/initialize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -36,24 +74,10 @@ export default function MonnifyPayment({ email, fullName, phone, amount, onSucce
         })
       })
 
-      // Check if response is ok
-      if (!res.ok) {
-        const errorText = await res.text()
-        console.error("❌ Server response not OK:", res.status, errorText)
-        throw new Error(`Server error: ${res.status}`)
-      }
-
-      // Try to parse JSON
-      let data
-      try {
-        data = await res.json()
-      } catch (parseError) {
-        console.error("❌ Failed to parse JSON response:", parseError)
-        throw new Error("Invalid response from server")
-      }
+      const data = await res.json()
       
       if (data.checkoutUrl) {
-        // Store reference in sessionStorage before redirect
+        // Store reference in sessionStorage for success page
         sessionStorage.setItem('pendingPayment', JSON.stringify({
           reference,
           amount,
@@ -61,7 +85,6 @@ export default function MonnifyPayment({ email, fullName, phone, amount, onSucce
           timestamp: Date.now()
         }))
         
-        console.log("✅ Redirecting to:", data.checkoutUrl)
         window.location.href = data.checkoutUrl
         onSuccess()
       } else {
@@ -69,26 +92,20 @@ export default function MonnifyPayment({ email, fullName, phone, amount, onSucce
       }
     } catch (error: any) {
       console.error("❌ Payment error:", error)
-      setError(error.message || "Something went wrong")
+      alert(error.message || "Something went wrong")
+      onClose()
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div>
-      {error && (
-        <div className="mb-3 p-3 bg-red-50 text-red-600 text-sm border border-red-200 rounded">
-          ⚠️ {error}
-        </div>
-      )}
-      <button
-        onClick={handlePayment}
-        disabled={loading}
-        className="w-full bg-[#C8A75B] text-black py-3 font-medium hover:bg-[#b8964a] transition disabled:bg-gray-300"
-      >
-        {loading ? "Processing..." : `Pay ₦${amount.toLocaleString()}`}
-      </button>
-    </div>
+    <button
+      onClick={handlePayment}
+      disabled={loading}
+      className="w-full bg-[#C8A75B] text-black py-3 font-medium hover:bg-[#b8964a] transition disabled:bg-gray-300"
+    >
+      {loading ? "Processing..." : `Pay ₦${amount.toLocaleString()}`}
+    </button>
   )
 }
