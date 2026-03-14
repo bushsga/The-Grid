@@ -15,7 +15,7 @@ function verifyMonnifySignature(payload: string, signature: string, secretKey: s
       .update(payload)
       .digest('hex')
     
-    // Use timing-safe comparison to prevent timing attacks
+    // Use timing-safe comparison
     return crypto.timingSafeEqual(
       Buffer.from(hash),
       Buffer.from(signature)
@@ -158,7 +158,9 @@ export async function POST(request: Request) {
   try {
     // Get raw body for signature verification
     const rawBody = await request.text()
-    const headersList = headers()
+    
+    // FIX: Await the headers() promise
+    const headersList = await headers()
     const signature = headersList.get('monnify-signature') || ''
     
     // Verify webhook signature
@@ -200,7 +202,7 @@ export async function POST(request: Request) {
       paymentStatus: "paid",
       orderStatus: "processing",
       updatedAt: new Date(),
-      monnifyData: eventData // Store webhook data for reference
+      monnifyData: eventData
     })
 
     console.log('✅ Order updated:', orderDoc.id)
@@ -213,15 +215,12 @@ export async function POST(request: Request) {
       ])
     } catch (emailError) {
       console.error('❌ Email sending failed:', emailError)
-      // Don't fail the webhook if emails fail
     }
 
-    // Always return 200 to acknowledge receipt
     return NextResponse.json({ received: true })
 
   } catch (error) {
     console.error('❌ Webhook error:', error)
-    // Still return 200 to prevent Monnify from retrying
     return NextResponse.json({ received: true })
   }
 }
