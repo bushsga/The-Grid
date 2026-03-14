@@ -15,7 +15,6 @@ function verifyMonnifySignature(payload: string, signature: string, secretKey: s
       .update(payload)
       .digest('hex')
     
-    // Use timing-safe comparison
     return crypto.timingSafeEqual(
       Buffer.from(hash),
       Buffer.from(signature)
@@ -156,12 +155,19 @@ ${itemsList}
 
 export async function POST(request: Request) {
   try {
-    // Get raw body for signature verification
+    // Get raw body
     const rawBody = await request.text()
     
-    // FIX: Await the headers() promise
+    // 🔴 DEBUG LOGS - Check what Monnify is sending
+    console.log("=".repeat(50))
+    console.log("📦 RAW WEBHOOK BODY:", rawBody)
+    
+    const payload = JSON.parse(rawBody)
+    console.log("📦 PARSED PAYLOAD:", JSON.stringify(payload, null, 2))
+    
     const headersList = await headers()
     const signature = headersList.get('monnify-signature') || ''
+    console.log("🔑 SIGNATURE PRESENT:", !!signature)
     
     // Verify webhook signature
     const secretKey = process.env.MONNIFY_SECRET_KEY || ''
@@ -172,30 +178,55 @@ export async function POST(request: Request) {
       return new NextResponse('Unauthorized', { status: 401 })
     }
 
-    // Parse the webhook payload
-    const payload = JSON.parse(rawBody)
-    console.log('📬 Webhook received:', payload.eventType)
-
     // Only handle successful transactions
     if (payload.eventType !== 'SUCCESSFUL_TRANSACTION') {
+      console.log('⏭️ Ignoring event type:', payload.eventType)
       return NextResponse.json({ received: true })
     }
 
     const eventData = payload.eventData
-    const paymentReference = eventData.paymentReference || eventData.transactionReference
+    
+    // 🔴 CHECK ALL POSSIBLE REFERENCE FIELDS
+    const possibleReferences = [
+      eventData.paymentReference,
+      eventData.transactionReference,
+      eventData.reference,
+      eventData.merchantReference,
+      eventData.orderReference,
+      eventData.orderId,
+      eventData.transactionId
+    ].filter(Boolean) // Remove null/undefined
+    
+    console.log("🔍 POSSIBLE REFERENCES FOUND:", possibleReferences)
 
-    // Find the order in Firebase
-    const ordersRef = collection(db, "orders")
-    const q = query(ordersRef, where("paymentReference", "==", paymentReference))
-    const querySnapshot = await getDocs(q)
+    // Try each possible reference until we find a match
+    let orderDoc = null
+    let matchedReference = null
 
-    if (querySnapshot.empty) {
-      console.log('❌ Order not found for reference:', paymentReference)
-      return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+    for (const ref of possibleReferences) {
+      console.log(`🔍 Trying reference: ${ref}`)
+      
+      const ordersRef = collection(db, "orders")
+      const q = query(ordersRef, where("paymentReference", "==", ref))
+      const querySnapshot = await getDocs(q)
+      
+      if (!querySnapshot.empty) {
+        orderDoc = querySnapshot.docs[0]
+        matchedReference = ref
+        console.log(`✅ Found order with reference: ${ref}`)
+        break
+      }
+    }
+
+    if (!orderDoc) {
+      console.error('❌ No order found for any reference:', possibleReferences)
+      return NextResponse.json({ 
+        error: 'Order not found', 
+        attemptedReferences: possibleReferences 
+      }, { status: 404 })
     }
 
     // Update the order status
-    const orderDoc = querySnapshot.docs[0]
     const orderData = orderDoc.data()
     
     await updateDoc(doc(db, "orders", orderDoc.id), {
@@ -205,7 +236,7 @@ export async function POST(request: Request) {
       monnifyData: eventData
     })
 
-    console.log('✅ Order updated:', orderDoc.id)
+    console.log('✅ Order updated successfully:', orderDoc.id)
 
     // Send email notifications
     try {
@@ -213,6 +244,7 @@ export async function POST(request: Request) {
         sendCustomerEmail({ id: orderDoc.id, ...orderData }, orderData.customer.email),
         sendAdminEmail({ id: orderDoc.id, ...orderData })
       ])
+      console.log('✅ Emails sent successfully')
     } catch (emailError) {
       console.error('❌ Email sending failed:', emailError)
     }
