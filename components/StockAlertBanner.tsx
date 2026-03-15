@@ -4,32 +4,29 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { AlertTriangle, X } from "lucide-react"
 import { db } from "@/lib/firebase"
-import { collection, query, where, getDocs } from "firebase/firestore"
+import { collection, query, where, getDocs, onSnapshot } from "firebase/firestore"
 
 export default function StockAlertBanner() {
   const [lowStockProducts, setLowStockProducts] = useState<any[]>([])
   const [dismissed, setDismissed] = useState(false)
 
   useEffect(() => {
-    checkLowStock()
-  }, [])
-
-  const checkLowStock = async () => {
-    try {
-      const productsRef = collection(db, "products")
-      const q = query(productsRef, where("stock", "<", 10)) // Alert when stock < 10
-      const querySnapshot = await getDocs(q)
-      
+    // Real-time listener for low stock products
+    const productsRef = collection(db, "products")
+    const q = query(productsRef, where("stock", "<", 10))
+    
+    // This updates in REAL TIME when stock changes
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const products: any[] = []
       querySnapshot.forEach((doc) => {
         products.push({ id: doc.id, ...doc.data() })
       })
-      
       setLowStockProducts(products)
-    } catch (error) {
-      console.error("Error checking low stock:", error)
-    }
-  }
+      console.log("🔄 Stock alert updated:", products.length, "products low")
+    })
+
+    return () => unsubscribe()
+  }, [])
 
   if (dismissed || lowStockProducts.length === 0) return null
 
@@ -43,7 +40,7 @@ export default function StockAlertBanner() {
       </button>
       
       <div className="flex items-start">
-        <AlertTriangle className="w-5 h-5 text-orange-500 mr-3 shrink-0 mt-0.5" />
+        <AlertTriangle className="w-5 h-5 text-orange-500 mr-3 flex-shrink-0 mt-0.5" />
         <div>
           <h3 className="font-semibold text-orange-800">
             Low Stock Alert - {lowStockProducts.length} product(s) need attention

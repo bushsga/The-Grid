@@ -11,6 +11,8 @@
   "dependencies": {
     "@cloudinary/react": "^1.14.4",
     "@cloudinary/url-gen": "^1.22.0",
+    "@emailjs/browser": "^4.4.1",
+    "@emailjs/nodejs": "^5.0.2",
     "cloudinary-core": "^2.14.1",
     "firebase": "^12.10.0",
     "lucide-react": "^0.576.0",

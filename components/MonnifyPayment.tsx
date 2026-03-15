@@ -1,9 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { db } from "@/lib/firebase"
-import { collection, addDoc } from "firebase/firestore"
-import { useCart } from "@/context/CartContext"
 
 type Props = {
   email: string
@@ -12,54 +9,29 @@ type Props = {
   amount: number
   onSuccess: () => void
   onClose: () => void
+  saveOrder: (reference: string) => Promise<void>  // ✅ Add this
 }
 
-export default function MonnifyPayment({ email, fullName, phone, amount, onSuccess, onClose }: Props) {
+export default function MonnifyPayment({ 
+  email, 
+  fullName, 
+  phone, 
+  amount, 
+  onSuccess, 
+  onClose,
+  saveOrder  // ✅ Add this
+}: Props) {
   const [loading, setLoading] = useState(false)
-  const { items, clearCart } = useCart()
-
-  const saveOrderToFirebase = async (reference: string) => {
-    try {
-      const orderData = {
-        customer: {
-          name: fullName,
-          email: email,
-          phone: phone
-        },
-        items: items.map(item => ({
-          productId: item.product.id,
-          name: item.product.name,
-          price: item.product.price,
-          quantity: item.quantity,
-          total: item.product.price * item.quantity
-        })),
-        totalAmount: amount,
-        paymentReference: reference,
-        paymentStatus: "pending",
-        orderStatus: "processing",
-        waybill: "",
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }
-
-      const docRef = await addDoc(collection(db, "orders"), orderData)
-      console.log("✅ Order saved with reference:", reference, "ID:", docRef.id)
-      return docRef.id
-    } catch (error) {
-      console.error("❌ Error saving order:", error)
-      throw error
-    }
-  }
 
   const handlePayment = async () => {
     setLoading(true)
     
-    // Generate reference BEFORE saving
     const reference = `GRID-${Date.now()}-${Math.floor(Math.random() * 1000)}`
     
     try {
-      // 1️⃣ SAVE ORDER FIRST (with pending status)
-      await saveOrderToFirebase(reference)
+      // 1️⃣ SAVE ORDER FIRST using the prop from checkout
+      await saveOrder(reference)
+      console.log("✅ Order saved, now initializing payment...")
       
       // 2️⃣ THEN initialize payment with Monnify
       const res = await fetch("/api/monnify/initialize", {

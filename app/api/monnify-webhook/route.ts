@@ -2,11 +2,10 @@ import { NextResponse } from "next/server"
 import { headers } from "next/headers"
 import { db } from "@/lib/firebase"
 import { collection, query, where, getDocs, updateDoc, doc } from "firebase/firestore"
-import { Resend } from 'resend'
+import emailjs from '@emailjs/nodejs'
 import crypto from 'crypto'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-
+// Verify Monnify webhook signature
 function verifyMonnifySignature(payload: string, signature: string, secretKey: string): boolean {
   try {
     const hash = crypto
@@ -24,104 +23,149 @@ function verifyMonnifySignature(payload: string, signature: string, secretKey: s
   }
 }
 
-async function sendCustomerEmail(order: any, customerEmail: string) {
+// Send emails using EmailJS - DEBUG VERSION
+async function sendEmails(order: any) {
   try {
+    console.log("=".repeat(50))
+    console.log("📧 DEBUG: Starting email process...")
+    console.log("📧 Order data received:", {
+      id: order.id,
+      reference: order.paymentReference,
+      customerEmail: order.customer?.email,
+      customerName: order.customer?.name
+    })
+    
+    // Format items list for email
     const itemsList = order.items.map((item: any) => 
-      `<tr>
-        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">${item.name}</td>
-        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: center;">${item.quantity}</td>
-        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: right;">₦${item.price.toLocaleString()}</td>
-        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: right;">₦${item.total.toLocaleString()}</td>
-      </tr>`
-    ).join('')
+      `• ${item.name} x${item.quantity} = ₦${item.total.toLocaleString()}`
+    ).join('\n')
 
-    const emailHtml = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <div style="background: #C8A75B; padding: 30px; text-align: center;">
-          <h1 style="color: #0B0F19;">THE GRID</h1>
-        </div>
-        <div style="padding: 40px 30px;">
-          <h2>Thank You for Your Order! 🎉</h2>
-          <p>Hi ${order.customer.name}, your order has been received.</p>
-          <p><strong>Reference:</strong> ${order.paymentReference}</p>
-          <p><strong>Total:</strong> ₦${order.totalAmount.toLocaleString()}</p>
-        </div>
-      </div>
-    `
+    // Format address
+    const fullAddress = `${order.customer.address}, ${order.customer.city}, ${order.customer.state}`
 
-    await resend.emails.send({
-      from: 'THE GRID <orders@thegridglobal.com>',
-      to: customerEmail,
-      subject: `✅ Order Confirmed - ${order.paymentReference}`,
-      html: emailHtml,
-    })
-    console.log('✅ Customer email sent')
-  } catch (error) {
-    console.error('❌ Failed to send customer email:', error)
-  }
-}
+    // Check environment variables
+    console.log("📧 ENV Check:")
+    console.log("- Service ID:", process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID ? "✅ Present" : "❌ Missing")
+    console.log("- Template ID:", process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID ? "✅ Present" : "❌ Missing")
+    console.log("- Public Key:", process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY ? "✅ Present" : "❌ Missing")
+    console.log("- Admin Email:", process.env.ADMIN_EMAIL ? "✅ Present" : "❌ Missing")
 
-async function sendAdminEmail(order: any) {
-  try {
-    await resend.emails.send({
-      from: 'THE GRID <notifications@thegridglobal.com>',
-      to: process.env.ADMIN_EMAIL || 'admin@thegridglobal.com',
-      subject: `🔔 New Order: ${order.paymentReference}`,
-      text: `New order received for ₦${order.totalAmount.toLocaleString()}`,
-    })
-    console.log('✅ Admin email sent')
-  } catch (error) {
-    console.error('❌ Failed to send admin email:', error)
+    // 1️⃣ SEND TO CUSTOMER
+    console.log("📧 Preparing customer email for:", order.customer.email)
+    
+    const customerParams = {
+      to_email: order.customer.email,
+      customer_name: order.customer.name,
+      order_reference: order.paymentReference,
+      total_amount: `₦${order.totalAmount.toLocaleString()}`,
+      items_list: itemsList,
+      delivery_address: fullAddress,
+      company_name: 'THE GRID',
+      support_email: 'support@thegridglobal.com',
+      website_url: process.env.NEXT_PUBLIC_SITE_URL || 'https://thegridglobal.com'
+    }
+
+    console.log("📧 Customer params:", JSON.stringify(customerParams, null, 2))
+
+    const customerResponse = await emailjs.send(
+      process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
+      process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,
+      customerParams,
+      {
+        publicKey: process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!
+      }
+    )
+    console.log("✅ Customer email response:", customerResponse)
+
+    // 2️⃣ SEND TO VENDOR (ADMIN)
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@thegridglobal.com'
+    console.log("📧 Preparing admin email for:", adminEmail)
+    
+    const vendorParams = {
+      to_email: adminEmail,
+      customer_name: order.customer.name,
+      customer_email: order.customer.email,
+      customer_phone: order.customer.phone,
+      order_reference: order.paymentReference,
+      total_amount: `₦${order.totalAmount.toLocaleString()}`,
+      items_list: itemsList,
+      delivery_address: fullAddress,
+      order_date: new Date().toLocaleString(),
+      admin_link: `${process.env.NEXT_PUBLIC_SITE_URL}/admin/orders`
+    }
+
+    console.log("📧 Vendor params:", JSON.stringify(vendorParams, null, 2))
+
+    const vendorResponse = await emailjs.send(
+      process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
+      process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,
+      vendorParams,
+      {
+        publicKey: process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!
+      }
+    )
+    console.log("✅ Admin email response:", vendorResponse)
+
+    console.log("✅ Both emails sent successfully!")
+    console.log("=".repeat(50))
+    return true
+
+  } catch (error: any) {
+    console.error("=".repeat(50))
+    console.error("❌ Email error:", error)
+    if (error.text) console.error("Error details:", error.text)
+    if (error.status) console.error("Error status:", error.status)
+    console.error("=".repeat(50))
+    return false
   }
 }
 
 export async function POST(request: Request) {
   try {
+    console.log("=".repeat(50))
+    console.log("📬 Webhook received at:", new Date().toISOString())
+    
     const rawBody = await request.text()
     const payload = JSON.parse(rawBody)
     const headersList = await headers()
     const signature = headersList.get('monnify-signature') || ''
+    
+    console.log("📦 Event type:", payload.eventType)
     
     // Verify signature
     const secretKey = process.env.MONNIFY_SECRET_KEY || ''
     const isValid = verifyMonnifySignature(rawBody, signature, secretKey)
     
     if (!isValid) {
+      console.error('❌ Invalid webhook signature')
       return new NextResponse('Unauthorized', { status: 401 })
     }
 
     // Only handle successful transactions
     if (payload.eventType !== 'SUCCESSFUL_TRANSACTION') {
+      console.log('⏭️ Ignoring event type:', payload.eventType)
       return NextResponse.json({ received: true })
     }
 
     const eventData = payload.eventData
     
-    // 🔍 TRY TO FIND ORDER WITH EITHER REFERENCE
+    // Get references
     const yourReference = eventData.paymentReference
     const monnifyReference = eventData.transactionReference
     
-    console.log("🔍 Looking for order with your reference:", yourReference)
-    console.log("🔍 Or with Monnify reference:", monnifyReference)
+    console.log("🔍 Looking for order with reference:", yourReference)
 
-    // Try your reference first
-    let ordersRef = collection(db, "orders")
-    let q = query(ordersRef, where("paymentReference", "==", yourReference))
-    let querySnapshot = await getDocs(q)
-
-    // If not found, try Monnify reference
-    if (querySnapshot.empty && monnifyReference) {
-      console.log("⚠️ Order not found with your reference, trying Monnify reference")
-      q = query(ordersRef, where("paymentReference", "==", monnifyReference))
-      querySnapshot = await getDocs(q)
-    }
+    // Find the order in Firebase
+    const ordersRef = collection(db, "orders")
+    const q = query(ordersRef, where("paymentReference", "==", yourReference))
+    const querySnapshot = await getDocs(q)
 
     if (querySnapshot.empty) {
-      console.error("❌ Order not found for any reference")
+      console.error("❌ Order not found for reference:", yourReference)
       return NextResponse.json({ error: 'Order not found' }, { status: 404 })
     }
 
-    // Update order
+    // Update the order
     const orderDoc = querySnapshot.docs[0]
     const orderData = orderDoc.data()
     
@@ -129,23 +173,30 @@ export async function POST(request: Request) {
       paymentStatus: "paid",
       orderStatus: "processing",
       updatedAt: new Date(),
-      monnifyData: eventData
+      monnifyData: eventData,
+      monnifyReference: monnifyReference
     })
 
-    console.log("✅ Order updated:", orderDoc.id)
+    console.log("✅ Order updated successfully. ID:", orderDoc.id)
 
-    // Send emails
-    try {
-      await sendCustomerEmail({ id: orderDoc.id, ...orderData }, orderData.customer.email)
-      await sendAdminEmail({ id: orderDoc.id, ...orderData })
-    } catch (emailError) {
-      console.error("❌ Email error:", emailError)
-    }
+    // Send both emails
+    await sendEmails({ id: orderDoc.id, ...orderData })
 
-    return NextResponse.json({ received: true })
+    console.log("✅ Webhook processing complete")
+    console.log("=".repeat(50))
 
-  } catch (error) {
+    return NextResponse.json({ 
+      received: true,
+      orderId: orderDoc.id,
+      reference: orderData.paymentReference
+    })
+
+  } catch (error: any) {
     console.error("❌ Webhook error:", error)
-    return NextResponse.json({ received: true })
+    console.log("=".repeat(50))
+    return NextResponse.json({ 
+      received: true,
+      error: error.message 
+    })
   }
 }

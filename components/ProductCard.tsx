@@ -24,12 +24,15 @@ export default function ProductCard({ product }: Props) {
     }
   }
 
+  // Determine stock status
+  const isOutOfStock = product.stock <= 0
+  const isLowStock = product.stock > 0 && product.stock < 5
+
   return (
-    <div className="bg-white shadow-sm hover:shadow-md transition overflow-hidden">
-      {/* IMAGE - INSIDE WHITE CONTAINER */}
+    <div className="bg-white shadow-sm hover:shadow-md transition overflow-hidden flex flex-col h-full">
       <Link href={`/products/${product.id}`} className="block">
         {product.imageUrl ? (
-          <div className="w-full bg-gray-50" style={{ height: '250px' }}>
+          <div className="w-full h-48 bg-gray-50" style={{ height: '200px' }}>
             <img 
               src={product.imageUrl} 
               alt={product.name}
@@ -41,47 +44,49 @@ export default function ProductCard({ product }: Props) {
             />
           </div>
         ) : (
-          <div style={{ width: '100%', height: '250px' }} className="bg-gray-200 flex items-center justify-center">
+          <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
             <span className="text-gray-400">No image</span>
           </div>
         )}
       </Link>
 
-      {/* CONTENT - SAME WHITE CONTAINER, MINIMAL GAP */}
-      <div className="p-4">
+      <div className="p-4 flex-1 flex flex-col">
         <Link href={`/products/${product.id}`}>
-          <h3 className="font-medium text-lg hover:text-[#C8A75B] transition">
+          <h3 className="font-medium text-lg hover:text-[#C8A75B] transition line-clamp-2">
             {product.name}
           </h3>
         </Link>
 
-        <p className="text-sm text-gray-500 mt-1">
-          {product.category}
-        </p>
+        <p className="text-sm text-gray-500 mt-1">{product.category}</p>
 
         <div className="mt-2 text-xl font-semibold">
           ₦{product.price.toLocaleString()}
         </div>
 
-        <div className="mt-1 text-sm">
-          {product.stock > 0 ? (
-            <span className="text-gray-600">{product.stock} left in stock</span>
+        {/* Stock Status Display */}
+        <div className="mt-2">
+          {isOutOfStock ? (
+            <span className="text-red-600 font-medium">Out of Stock</span>
+          ) : isLowStock ? (
+            <span className="text-orange-600">Only {product.stock} left!</span>
           ) : (
-            <span className="text-red-600">Out of Stock</span>
+            <span className="text-green-600">In Stock ({product.stock})</span>
           )}
         </div>
         
-        <button 
-          onClick={handleAddToCart}
-          disabled={product.stock <= 0}
-          className={`mt-3 w-full py-2.5 text-sm font-medium transition ${
-            product.stock <= 0 
-              ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-              : 'bg-[#C8A75B] text-black hover:bg-[#b8964a]'
-          }`}
-        >
-          {product.stock <= 0 ? 'Out of Stock' : 'Add to Cart'}
-        </button>
+        <div className="mt-4">
+          <button 
+            onClick={handleAddToCart}
+            disabled={isOutOfStock}
+            className={`w-full py-2 px-4 text-sm font-medium transition ${
+              isOutOfStock 
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                : 'bg-[#C8A75B] text-black hover:bg-[#b8964a]'
+            }`}
+          >
+            {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+          </button>
+        </div>
       </div>
     </div>
   )

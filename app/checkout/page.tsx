@@ -35,6 +35,27 @@ export default function CheckoutPage() {
     setFormData(prev => ({ ...prev, [name]: value }))
   }
 
+  // ✅ THIS UPDATES PRODUCT STOCK
+  const updateProductStock = async (productId: string, quantityPurchased: number) => {
+    try {
+      const productRef = doc(db, "products", productId)
+      const productSnap = await getDoc(productRef)
+      
+      if (productSnap.exists()) {
+        const currentStock = productSnap.data().stock || 0
+        const newStock = Math.max(0, currentStock - quantityPurchased)
+        
+        await updateDoc(productRef, {
+          stock: newStock,
+          updatedAt: new Date()
+        })
+        console.log(`✅ Stock updated for ${productId}: ${currentStock} → ${newStock}`)
+      }
+    } catch (error) {
+      console.error("❌ Error updating stock:", error)
+    }
+  }
+
   const saveOrderToFirebase = async (paymentReference: string) => {
     try {
       const orderData = {
@@ -48,28 +69,38 @@ export default function CheckoutPage() {
         })),
         totalAmount: totalPrice,
         paymentReference: paymentReference,
-        paymentStatus: "pending", // Will be updated by webhook
+        paymentStatus: "paid",
         orderStatus: "processing",
         waybill: "",
         createdAt: new Date(),
         updatedAt: new Date()
       }
 
+      // Save order first
       await addDoc(collection(db, "orders"), orderData)
-      console.log("Order saved with reference:", paymentReference)
+      console.log("✅ Order saved with reference:", paymentReference)
       
-      // Don't clear cart yet - wait for webhook confirmation
-      // clearCart()
+      // ✅ THEN UPDATE STOCK FOR EACH PRODUCT
+      for (const item of items) {
+        await updateProductStock(item.product.id, item.quantity)
+      }
+      
+      // Store reference for success page
+      sessionStorage.setItem('lastOrder', JSON.stringify({
+        reference: paymentReference,
+        items: items.length,
+        total: totalPrice
+      }))
       
     } catch (error) {
-      console.error("Error saving order:", error)
+      console.error("❌ Error saving order:", error)
     }
   }
 
-  const handlePaymentSuccess = () => {
-    console.log("Redirecting to Monnify...")
-    // Don't do anything else - redirect happens automatically
-  }
+ const handlePaymentSuccess = () => {
+  console.log("✅ Payment successful, order saved in MonnifyPayment")
+  // No need to do anything here - order already saved in MonnifyPayment
+}
 
   const handlePaymentClose = () => {
     alert("Payment cancelled. You can try again.")
@@ -147,6 +178,7 @@ export default function CheckoutPage() {
                     amount={totalPrice}
                     onSuccess={handlePaymentSuccess}
                     onClose={handlePaymentClose}
+                    saveOrder={saveOrderToFirebase} // ✅ Pass the save function
                   />
                 </div>
               )}
