@@ -3,12 +3,20 @@ import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
 import { CartProvider } from "@/context/CartContext"
 import { Toaster } from 'react-hot-toast'
-import { Inter, Playfair_Display } from "next/font/google"
+import { Montserrat, Playfair_Display } from "next/font/google"
 import type { Metadata } from "next"
 import JsonLd from "@/components/JsonLd"
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
-const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" })
+const montserrat = Montserrat({ 
+  subsets: ["latin"], 
+  variable: "--font-montserrat",
+  weight: ['300', '400', '500', '600', '700', '800'] 
+})
+
+const playfair = Playfair_Display({ 
+  subsets: ["latin"], 
+  variable: "--font-playfair" 
+})
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://thegridglobal.com'),
@@ -92,7 +100,7 @@ export default function RootLayout({
         {/* You don't need to manually add icon links here!
             Next.js automatically injects them from the metadata.icons config above */}
       </head>
-      <body className={`${inter.variable} ${playfair.variable} font-sans`}>
+      <body className={`${montserrat.variable} ${playfair.variable} font-sans`}>
         <JsonLd />
         <CartProvider>
           <Navbar />

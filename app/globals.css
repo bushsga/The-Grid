@@ -14,7 +14,7 @@ body {
 body {
   background: white;
   color: #0B0F19;
-  font-family: var(--font-inter), system-ui, sans-serif;
+  font-family: var(--font-montserrat), system-ui, sans-serif; /* Changed from Inter to Montserrat */
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -23,6 +23,25 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: -0.02em;
 }
 
+/* Optional: Add specific weights for Montserrat if needed */
+.font-medium {
+  font-weight: 500;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+/* Keep the serif class for any headings that need Playfair */
 .font-serif {
   font-family: var(--font-playfair), Georgia, serif;
+}
+
+/* Add a class for Montserrat if needed elsewhere */
+.font-montserrat {
+  font-family: var(--font-montserrat), system-ui, sans-serif;
 }
