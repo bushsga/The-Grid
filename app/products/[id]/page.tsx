@@ -2,10 +2,75 @@ import Container from "@/components/Container"
 import { getProducts } from "@/lib/getProducts"
 import { notFound } from "next/navigation"
 import AddToCartButton from "@/components/AddToCartButton"
+import { Metadata, ResolvingMetadata } from 'next'
 
 type Props = {
   params: Promise<{ id: string }>
 }
+
+
+export async function generateMetadata(
+  { params }: Props,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const { id } = await params
+  const products = await getProducts()
+  const product = products.find((p) => p.id === id)
+
+  if (!product) {
+    return {
+      title: 'Product Not Found',
+      description: 'The requested solar product could not be found.'
+    }
+  }
+
+  return {
+    title: `${product.name} | THE GRID`,
+    description: product.description.slice(0, 160),
+    keywords: [
+      `${product.name}`,
+      `${product.category}`,
+      'solar Nigeria',
+      'power backup Ilorin',
+      'solar panels Kwara',
+      'inverter',
+      'renewable energy'
+    ],
+    openGraph: {
+      title: `${product.name} - Premium Solar Solution`,
+      description: product.description.slice(0, 160),
+      url: `https://thegridglobal.com/products/${product.id}`,
+      siteName: 'THE GRID',
+      images: product.imageUrl ? [
+        {
+          url: product.imageUrl,
+          width: 1200,
+          height: 630,
+          alt: product.name,
+        }
+      ] : [
+        {
+          url: '/images/og-image.jpg',
+          width: 1200,
+          height: 630,
+          alt: 'THE GRID Solar Solutions',
+        }
+      ],
+      locale: 'en_NG',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${product.name} | THE GRID`,
+      description: product.description.slice(0, 120),
+      images: product.imageUrl ? [product.imageUrl] : ['/images/twitter-image.jpg'],
+    },
+    alternates: {
+      canonical: `https://thegridglobal.com/products/${product.id}`,
+    },
+  }
+}
+
 
 export default async function ProductDetails({ params }: Props) {
   const { id } = await params

@@ -88,11 +88,11 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-3 text-sm text-gray-400">
                 <Phone className="w-5 h-5 text-[#C8A75B] shrink-0" />
-                <span>+234 123 456 7890</span>
+                <span>08144414547</span>
               </li>
               <li className="flex items-center gap-3 text-sm text-gray-400">
                 <Mail className="w-5 h-5 text-[#C8A75B] shrink-0" />
-                <span>gridsolar98@gmail.com</span>
+                <span>thegridgloballtd@gmail.com</span>
               </li>
             </ul>
           </div>
@@ -110,9 +110,6 @@ export default function Footer() {
               </Link>
               <Link href="/terms" className="hover:text-[#C8A75B] transition">
                 Terms
-              </Link>
-              <Link href="/sitemap" className="hover:text-[#C8A75B] transition">
-                Sitemap
               </Link>
             </div>
           </div>

@@ -3,10 +3,48 @@ import ProductCard from "@/components/ProductCard"
 import { getProducts } from "@/lib/getProducts"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
+import { Metadata } from 'next'
 
 type Props = {
   searchParams: Promise<{ category?: string }>
 }
+
+export async function generateMetadata(
+  { searchParams }: { searchParams: Promise<{ category?: string }> }
+): Promise<Metadata> {
+  const { category } = await searchParams
+  
+  let title = "Solar Products Nigeria | THE GRID Ilorin"
+  let description = "Browse our premium solar panels, inverters, batteries, and home backup systems. Professional installation available nationwide. Based in Ilorin, Kwara State."
+  
+  if (category) {
+    title = `${category} Solutions in Ilorin | THE GRID Nigeria`
+    description = `Shop premium ${category.toLowerCase()} for homes and businesses in Ilorin, Kwara and nationwide. High-quality solar solutions with professional installation.`
+  }
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: 'https://thegridglobal.com/products',
+      siteName: 'THE GRID',
+      images: [
+        {
+          url: '/images/og-image.jpg',
+          width: 1200,
+          height: 630,
+          alt: 'THE GRID Solar Products - Ilorin',
+        }
+      ],
+      locale: 'en_NG',
+      type: 'website',
+    },
+  }
+}
+
+
 
 export default async function ProductsPage({ searchParams }: Props) {
   const { category } = await searchParams

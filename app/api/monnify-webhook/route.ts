@@ -23,17 +23,29 @@ function verifyMonnifySignature(payload: string, signature: string, secretKey: s
   }
 }
 
-// Send emails using EmailJS - DEBUG VERSION
+// Send emails using EmailJS
 async function sendEmails(order: any) {
   try {
     console.log("=".repeat(50))
-    console.log("📧 DEBUG: Starting email process...")
-    console.log("📧 Order data received:", {
-      id: order.id,
-      reference: order.paymentReference,
-      customerEmail: order.customer?.email,
-      customerName: order.customer?.name
-    })
+    console.log("📧 Sending emails for order:", order.paymentReference)
+    
+    // 🔴 DEBUG: Check environment variables
+    console.log("=".repeat(50))
+    console.log("🔍 EMAILJS CONFIG CHECK:");
+    console.log("Service ID:", process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID ? "✅ Present" : "❌ Missing");
+    console.log("Customer Template ID:", process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID ? "✅ Present" : "❌ Missing");
+    console.log("Vendor Template ID:", process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID_VENDOR ? "✅ Present" : "❌ Missing");
+    console.log("Public Key:", process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY ? "✅ Present" : "❌ Missing");
+    console.log("Private Key:", process.env.EMAILJS_PRIVATE_KEY ? "✅ Present" : "❌ Missing");
+    console.log("Admin Email:", process.env.ADMIN_EMAIL ? "✅ Present" : "❌ Missing");
+    
+    // Check if vendor template ID is actually different
+    if (process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID === process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID_VENDOR) {
+      console.log("⚠️ WARNING: Customer and Vendor templates are the SAME!");
+    } else {
+      console.log("✅ Customer and Vendor templates are DIFFERENT");
+    }
+    console.log("=".repeat(50))
     
     // Format items list for email
     const itemsList = order.items.map((item: any) => 
@@ -43,15 +55,9 @@ async function sendEmails(order: any) {
     // Format address
     const fullAddress = `${order.customer.address}, ${order.customer.city}, ${order.customer.state}`
 
-    // Check environment variables
-    console.log("📧 ENV Check:")
-    console.log("- Service ID:", process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID ? "✅ Present" : "❌ Missing")
-    console.log("- Template ID:", process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID ? "✅ Present" : "❌ Missing")
-    console.log("- Public Key:", process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY ? "✅ Present" : "❌ Missing")
-    console.log("- Admin Email:", process.env.ADMIN_EMAIL ? "✅ Present" : "❌ Missing")
-
-    // 1️⃣ SEND TO CUSTOMER
-    console.log("📧 Preparing customer email for:", order.customer.email)
+    // 1️⃣ SEND TO CUSTOMER (Order Confirmation)
+    console.log("📧 Sending customer email to:", order.customer.email)
+    console.log("📧 Using template:", process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID);
     
     const customerParams = {
       to_email: order.customer.email,
@@ -61,25 +67,24 @@ async function sendEmails(order: any) {
       items_list: itemsList,
       delivery_address: fullAddress,
       company_name: 'THE GRID',
-      support_email: 'support@thegridglobal.com',
-      website_url: process.env.NEXT_PUBLIC_SITE_URL || 'https://thegridglobal.com'
+      support_email: 'support@thegridglobal.com'
     }
-
-    console.log("📧 Customer params:", JSON.stringify(customerParams, null, 2))
 
     const customerResponse = await emailjs.send(
       process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
       process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,
       customerParams,
       {
-        publicKey: process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!
+        publicKey: process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!,
+        privateKey: process.env.EMAILJS_PRIVATE_KEY
       }
     )
-    console.log("✅ Customer email response:", customerResponse)
+    console.log("✅ Customer email sent. Status:", customerResponse.status)
 
-    // 2️⃣ SEND TO VENDOR (ADMIN)
+    // 2️⃣ SEND TO VENDOR (YOU) - New Order Notification
     const adminEmail = process.env.ADMIN_EMAIL || 'admin@thegridglobal.com'
-    console.log("📧 Preparing admin email for:", adminEmail)
+    console.log("📧 Sending vendor notification to:", adminEmail)
+    console.log("📧 Using template:", process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID_VENDOR);
     
     const vendorParams = {
       to_email: adminEmail,
@@ -94,28 +99,23 @@ async function sendEmails(order: any) {
       admin_link: `${process.env.NEXT_PUBLIC_SITE_URL}/admin/orders`
     }
 
-    console.log("📧 Vendor params:", JSON.stringify(vendorParams, null, 2))
-
     const vendorResponse = await emailjs.send(
       process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
-      process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,
+      process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID_VENDOR!,
       vendorParams,
       {
-        publicKey: process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!
+        publicKey: process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!,
+        privateKey: process.env.EMAILJS_PRIVATE_KEY
       }
     )
-    console.log("✅ Admin email response:", vendorResponse)
+    console.log("✅ Vendor email sent. Status:", vendorResponse.status)
 
     console.log("✅ Both emails sent successfully!")
-    console.log("=".repeat(50))
     return true
 
   } catch (error: any) {
-    console.error("=".repeat(50))
     console.error("❌ Email error:", error)
     if (error.text) console.error("Error details:", error.text)
-    if (error.status) console.error("Error status:", error.status)
-    console.error("=".repeat(50))
     return false
   }
 }
