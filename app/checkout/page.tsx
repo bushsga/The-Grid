@@ -6,7 +6,7 @@ import { db } from "@/lib/firebase"
 import { collection, addDoc, doc, getDoc, updateDoc } from "firebase/firestore"
 import { useCart } from "@/context/CartContext"
 import Container from "@/components/Container"
-import MonnifyPayment from "@/components/MonnifyPayment"
+import PaystackPayment from "@/components/PaystackPayment"
 import Link from "next/link"
 
 export default function CheckoutPage() {
@@ -35,7 +35,7 @@ export default function CheckoutPage() {
     setFormData(prev => ({ ...prev, [name]: value }))
   }
 
-  // ✅ THIS UPDATES PRODUCT STOCK
+  // ✅ UPDATE PRODUCT STOCK
   const updateProductStock = async (productId: string, quantityPurchased: number) => {
     try {
       const productRef = doc(db, "products", productId)
@@ -56,6 +56,7 @@ export default function CheckoutPage() {
     }
   }
 
+  // ✅ SAVE ORDER AND UPDATE STOCK
   const saveOrderToFirebase = async (paymentReference: string) => {
     try {
       const orderData = {
@@ -76,31 +77,27 @@ export default function CheckoutPage() {
         updatedAt: new Date()
       }
 
-      // Save order first
+      // Save order
       await addDoc(collection(db, "orders"), orderData)
       console.log("✅ Order saved with reference:", paymentReference)
       
-      // ✅ THEN UPDATE STOCK FOR EACH PRODUCT
+      // ✅ UPDATE STOCK FOR EACH PRODUCT
       for (const item of items) {
         await updateProductStock(item.product.id, item.quantity)
       }
       
-      // Store reference for success page
-      sessionStorage.setItem('lastOrder', JSON.stringify({
-        reference: paymentReference,
-        items: items.length,
-        total: totalPrice
-      }))
+      // Clear cart
+      clearCart()
       
     } catch (error) {
       console.error("❌ Error saving order:", error)
     }
   }
 
- const handlePaymentSuccess = () => {
-  console.log("✅ Payment successful, order saved in MonnifyPayment")
-  // No need to do anything here - order already saved in MonnifyPayment
-}
+  const handlePaymentSuccess = (response: any) => {
+    console.log("💰 Payment successful!", response)
+    saveOrderToFirebase(response.reference)
+  }
 
   const handlePaymentClose = () => {
     alert("Payment cancelled. You can try again.")
@@ -171,14 +168,13 @@ export default function CheckoutPage() {
                 </button>
               ) : (
                 <div className="mt-4">
-                  <MonnifyPayment
+                  <PaystackPayment
                     email={formData.email}
                     fullName={formData.fullName}
                     phone={formData.phone}
                     amount={totalPrice}
                     onSuccess={handlePaymentSuccess}
                     onClose={handlePaymentClose}
-                    saveOrder={saveOrderToFirebase} // ✅ Pass the save function
                   />
                 </div>
               )}

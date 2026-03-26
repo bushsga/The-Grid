@@ -1,16 +1,14 @@
 "use client"
 
-// @ts-ignore
+// @ts-ignore - paystack-react-lite type issue with React 19
 import { PaystackButton } from 'paystack-react-lite'
-import { useCart } from "@/context/CartContext"
-import { useRouter } from "next/navigation"
 
 type PaystackPaymentProps = {
   email: string
   fullName: string
   phone: string
   amount: number
-  onSuccess: (response: any) => void  // ← Changed to accept response
+  onSuccess: (response: any) => void
   onClose: () => void
 }
 
@@ -22,14 +20,11 @@ export default function PaystackPayment({
   onSuccess, 
   onClose 
 }: PaystackPaymentProps) {
-  const { clearCart } = useCart()
-  const router = useRouter()
-
   // Convert to kobo (Paystack uses smallest currency unit)
   const amountInKobo = amount * 100
 
   // Generate unique reference
-  const reference = `SOLAR-${Date.now()}-${Math.floor(Math.random() * 1000000)}`
+  const reference = `GRID-${Date.now()}-${Math.floor(Math.random() * 1000000)}`
 
   // Metadata for the transaction
   const metadata = {
@@ -50,7 +45,6 @@ export default function PaystackPayment({
   // Handle successful payment
   const handleSuccess = (response: any) => {
     console.log("Payment successful:", response)
-    // Call the onSuccess prop with the response
     onSuccess(response)
   }
 

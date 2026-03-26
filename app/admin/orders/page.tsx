@@ -26,6 +26,7 @@ type Order = {
   orderStatus: string
   waybill: string
   createdAt: any
+  paymentReference?: string
 }
 
 export default function OrdersPage() {
@@ -94,7 +95,6 @@ export default function OrdersPage() {
     }
   }
 
-  // ✅ NEW: Delete order function
   const deleteOrder = async (orderId: string) => {
     if (!confirm("Are you sure you want to delete this order? This action cannot be undone.")) {
       return
@@ -143,7 +143,7 @@ export default function OrdersPage() {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="border p-2 rounded-sm"
+          className="border p-2 rounded-sm text-sm"
         >
           <option value="all">All Orders</option>
           <option value="pending">Pending</option>
@@ -161,9 +161,9 @@ export default function OrdersPage() {
       ) : (
         <div className="space-y-4">
           {filteredOrders.map((order) => (
-            <div key={order.id} className="bg-white p-6 shadow-sm">
-              {/* Order Header */}
-              <div className="flex justify-between items-start mb-4">
+            <div key={order.id} className="bg-white p-4 md:p-6 shadow-sm">
+              {/* Order Header - Responsive */}
+              <div className="flex flex-col md:flex-row justify-between items-start gap-2 mb-4">
                 <div>
                   <h2 className="font-semibold">{order.customer.name}</h2>
                   <p className="text-sm text-gray-600">{order.customer.email} • {order.customer.phone}</p>
@@ -171,11 +171,14 @@ export default function OrdersPage() {
                     {order.customer.address}, {order.customer.city}, {order.customer.state}
                   </p>
                 </div>
-                <div className="text-right">
+                <div className="text-left md:text-right">
                   <div className="text-xl font-semibold">₦{order.totalAmount.toLocaleString()}</div>
                   <p className="text-xs text-gray-500">
                     {order.createdAt?.toDate().toLocaleString()}
                   </p>
+                  {order.paymentReference && (
+                    <p className="text-xs text-gray-500 font-mono mt-1">Ref: {order.paymentReference}</p>
+                  )}
                 </div>
               </div>
 
@@ -192,26 +195,22 @@ export default function OrdersPage() {
                 </div>
               </div>
 
-              {/* Status and Actions */}
-              <div className="border-t pt-4 flex items-center justify-between">
-                <div className="flex items-center gap-4">
+              {/* Status and Actions - Responsive */}
+              <div className="border-t pt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className={`px-3 py-1 text-xs rounded-full ${getStatusBadge(order.orderStatus)}`}>
                     {order.orderStatus}
                   </span>
-                  
                   {order.waybill && (
-                    <span className="text-sm">
-                      📦 Waybill: {order.waybill}
-                    </span>
+                    <span className="text-sm break-all">📦 Waybill: {order.waybill}</span>
                   )}
                 </div>
 
-                <div className="flex gap-2">
-                  {/* Status Update Dropdown */}
+                <div className="flex flex-wrap gap-2 w-full sm:w-auto">
                   <select
                     onChange={(e) => updateOrderStatus(order.id, e.target.value)}
                     value={order.orderStatus}
-                    className="border p-2 text-sm rounded-sm"
+                    className="border p-2 text-sm rounded-sm flex-1 sm:flex-initial"
                   >
                     <option value="pending">Pending</option>
                     <option value="processing">Processing</option>
@@ -220,57 +219,65 @@ export default function OrdersPage() {
                     <option value="cancelled">Cancelled</option>
                   </select>
 
-                  {/* Add Waybill Button */}
                   {order.orderStatus !== "delivered" && (
                     <button
                       onClick={() => setSelectedOrder(order)}
-                      className="bg-[#C8A75B] text-black px-3 py-2 text-sm rounded-sm hover:bg-[#b8964a]"
+                      className="bg-[#C8A75B] text-black px-3 py-2 text-sm rounded-sm hover:bg-[#b8964a] transition flex-1 sm:flex-initial"
                     >
                       + Waybill
                     </button>
                   )}
 
-                  {/* ✅ DELETE BUTTON - Only for delivered orders */}
                   {order.orderStatus === "delivered" && (
                     <button
                       onClick={() => deleteOrder(order.id)}
-                      className="bg-red-500 text-white px-3 py-2 text-sm rounded-sm hover:bg-red-600"
+                      className="bg-red-500 text-white px-3 py-2 text-sm rounded-sm hover:bg-red-600 transition flex-1 sm:flex-initial"
                     >
                       Delete
                     </button>
                   )}
                 </div>
               </div>
-
-              {/* Waybill Input Modal */}
-              {selectedOrder?.id === order.id && (
-                <div className="mt-4 p-4 bg-gray-50 border">
-                  <h3 className="font-medium mb-2">Add Waybill Number</h3>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={waybillInput}
-                      onChange={(e) => setWaybillInput(e.target.value)}
-                      placeholder="Enter waybill number"
-                      className="flex-1 border p-2 rounded-sm"
-                    />
-                    <button
-                      onClick={() => updateWaybill(order.id)}
-                      className="bg-[#C8A75B] text-black px-4 py-2 rounded-sm hover:bg-[#b8964a]"
-                    >
-                      Save
-                    </button>
-                    <button
-                      onClick={() => setSelectedOrder(null)}
-                      className="border px-4 py-2 rounded-sm hover:bg-gray-100"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Waybill Input Modal - RESPONSIVE */}
+      {selectedOrder && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white p-6 rounded-sm w-full max-w-md mx-auto">
+            <h3 className="font-medium mb-4 text-lg">Add Waybill Number</h3>
+            <p className="text-sm text-gray-600 mb-3 break-all">
+              Order: <span className="font-mono">{selectedOrder.paymentReference || selectedOrder.id}</span>
+            </p>
+            
+            <div className="flex flex-col gap-3">
+              <input
+                type="text"
+                value={waybillInput}
+                onChange={(e) => setWaybillInput(e.target.value)}
+                placeholder="Enter waybill number"
+                className="w-full border p-3 rounded-sm text-sm"
+                autoFocus
+              />
+              
+              <div className="flex flex-col sm:flex-row gap-2">
+                <button
+                  onClick={() => updateWaybill(selectedOrder.id)}
+                  className="bg-[#C8A75B] text-black px-4 py-2 rounded-sm hover:bg-[#b8964a] transition w-full sm:w-auto"
+                >
+                  Save Waybill
+                </button>
+                <button
+                  onClick={() => setSelectedOrder(null)}
+                  className="border px-4 py-2 rounded-sm hover:bg-gray-100 transition w-full sm:w-auto"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </Container>
