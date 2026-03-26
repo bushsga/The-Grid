@@ -11,37 +11,39 @@ body {
   --brand-gray: #F5F5F5;
 }
 
+/* Apply Montserrat to body - but keep it as variable reference */
 body {
   background: white;
   color: #0B0F19;
-  font-family: var(--font-montserrat), system-ui, sans-serif; /* Changed from Inter to Montserrat */
+  font-family: var(--font-montserrat), 'Montserrat', system-ui, sans-serif;
 }
 
+/* Headings also use Montserrat */
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-playfair), Georgia, serif;
+  font-family: var(--font-montserrat), 'Montserrat', system-ui, sans-serif;
   font-weight: 600;
   letter-spacing: -0.02em;
 }
 
-/* Optional: Add specific weights for Montserrat if needed */
-.font-medium {
-  font-weight: 500;
+/* Specific heading weights */
+h1 {
+  font-weight: 700;
+  letter-spacing: -0.03em;
 }
 
-.font-semibold {
-  font-weight: 600;
-}
-
-.font-bold {
+h2 {
   font-weight: 700;
 }
 
-/* Keep the serif class for any headings that need Playfair */
-.font-serif {
-  font-family: var(--font-playfair), Georgia, serif;
+h3 {
+  font-weight: 600;
 }
 
-/* Add a class for Montserrat if needed elsewhere */
+/* Utility classes */
 .font-montserrat {
-  font-family: var(--font-montserrat), system-ui, sans-serif;
+  font-family: var(--font-montserrat), 'Montserrat', system-ui, sans-serif;
+}
+
+.font-serif {
+  font-family: var(--font-playfair), Georgia, serif;
 }
