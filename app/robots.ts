@@ -9,18 +9,22 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: '*',
         allow: '/',
         disallow: [
-          '/admin/',
-          '/cart/',
-          '/checkout/',
-          '/checkout/success/',
-          '/api/',
-          '/*?category=*', // Allow but handle carefully
+          '/admin/',           // Admin area - don't index
+          '/cart/',            // Shopping cart - don't index
+          '/checkout/',        // Checkout process - don't index
+          '/checkout/success/', // Order confirmation - don't index
+          '/api/',             // API endpoints - don't index
+          // REMOVED: '/*?category=*' - we WANT Google to index category pages
         ],
       },
       {
         userAgent: 'Googlebot',
         allow: '/',
-        disallow: ['/admin/', '/api/'],
+        disallow: [
+          '/admin/', 
+          '/api/',
+        ],
+        // Googlebot can crawl category pages
       }
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
