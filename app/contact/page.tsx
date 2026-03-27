@@ -90,12 +90,12 @@ export default function ContactPage() {
           <div className="text-center p-6 bg-gray-50">
             <Phone className="w-8 h-8 text-[#C8A75B] mx-auto mb-3" />
             <h3 className="font-medium mb-2">Call Us</h3>
-            <p className="text-gray-600">+234 123 456 7890</p>
+            <p className="text-gray-600">08144414547</p>
           </div>
           <div className="text-center p-6 bg-gray-50">
             <Mail className="w-8 h-8 text-[#C8A75B] mx-auto mb-3" />
             <h3 className="font-medium mb-2">Email Us</h3>
-            <p className="text-gray-600">gridsolar98@gmail.com</p>
+            <p className="text-gray-600">thegridgloballtd@gmail.com</p>
           </div>
           <div className="text-center p-6 bg-gray-50">
             <MapPin className="w-8 h-8 text-[#C8A75B] mx-auto mb-3" />

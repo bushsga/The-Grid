@@ -177,21 +177,25 @@ export default function AddProduct() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Category *</label>
-              <select
-                name="category"
-                value={formData.category}
-                onChange={handleInputChange}
-                required
-                className="w-full border p-3 rounded-sm"
-              >
-                <option value="">Select category</option>
-                <option value="Portable Power">Portable Power</option>
-                <option value="Home Backup">Home Backup</option>
-                <option value="Solar Panels">Solar Panels</option>
-                <option value="Smart Tech">Smart Tech</option>
-              </select>
-            </div>
+  <label className="block text-sm font-medium mb-1">Category *</label>
+  <select
+    name="category"
+    value={formData.category}
+    onChange={handleInputChange}
+    required
+    className="w-full border p-3 rounded-sm"
+  >
+    <option value="">Select category</option>
+    <option value="Solar Panels">SOLAR PANELS</option>
+    <option value="Inverters & Controllers">INVERTERS & CONTROLLERS</option>
+    <option value="Batteries">BATTERIES</option>
+    <option value="Portable Power Stations">PORTABLE POWER STATIONS</option>
+    <option value="Fans & Home Appliances">FANS & HOME APPLIANCES</option>
+    <option value="Solar Lighting">SOLAR LIGHTING</option>
+    <option value="Gadgets & Accessories">GADGETS & ACCESSORIES</option>
+    <option value="Installation & Security">INSTALLATION & SECURITY</option>
+  </select>
+</div>
 
             <div>
               <label className="block text-sm font-medium mb-1">Brand</label>

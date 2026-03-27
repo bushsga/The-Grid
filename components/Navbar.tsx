@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Menu, X, ShoppingCart, Sun, Battery, Home, Cpu, Info, Phone } from "lucide-react"
+import { Menu, X, ShoppingCart, Sun, Zap, Battery, Power, Fan, Lightbulb, Smartphone, Shield, Info, Phone } from "lucide-react"
 import Container from "./Container"
 import { useCart } from "@/context/CartContext"
 
@@ -20,11 +20,19 @@ export default function Navbar() {
   }, [])
 
   const categories = [
-    { name: "Portable Power", href: "/products?category=Portable%20Power", icon: Battery },
-    { name: "Home Backup", href: "/products?category=Home%20Backup", icon: Home },
     { name: "Solar Panels", href: "/products?category=Solar%20Panels", icon: Sun },
-    { name: "Smart Tech", href: "/products?category=Smart%20Tech", icon: Cpu },
+    { name: "Inverters & Controllers", href: "/products?category=Inverters%20%26%20Controllers", icon: Zap },
+    { name: "Batteries", href: "/products?category=Batteries", icon: Battery },
+    { name: "Portable Power", href: "/products?category=Portable%20Power%20Stations", icon: Power },
+    { name: "Fans & Appliances", href: "/products?category=Fans%20%26%20Home%20Appliances", icon: Fan },
+    { name: "Solar Lighting", href: "/products?category=Solar%20Lighting", icon: Lightbulb },
+    { name: "Tech Hub", href: "/products?category=Gadgets%20%26%20Accessories", icon: Smartphone },
+    { name: "Installation", href: "/products?category=Installation%20%26%20Security", icon: Shield },
   ]
+
+  // Split categories into two rows for desktop
+  const firstRowCategories = categories.slice(0, 4)
+  const secondRowCategories = categories.slice(4, 8)
 
   return (
     <header 
@@ -36,43 +44,62 @@ export default function Navbar() {
       <Container>
         <div className="flex items-center justify-between py-4">
           {/* Logo */}
-          <Link href="/" className="text-xl font-semibold tracking-wide">
+          <Link href="/" className="text-xl font-semibold tracking-wide shrink-0">
             THE GRID
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-6">
-            {categories.map((cat) => {
-              const Icon = cat.icon
-              return (
-                <Link 
-                  key={cat.name} 
-                  href={cat.href}
-                  className="flex items-center gap-2 text-sm hover:text-[#C8A75B] transition"
-                >
-                  <Icon className="w-4 h-4" />
-                  {cat.name}
-                </Link>
-              )
-            })}
-            <Link 
-              href="/about" 
-              className="flex items-center gap-2 text-sm hover:text-[#C8A75B] transition"
-            >
-              <Info className="w-4 h-4" />
-              About
-            </Link>
-            <Link 
-              href="/contact" 
-              className="flex items-center gap-2 text-sm hover:text-[#C8A75B] transition"
-            >
-              <Phone className="w-4 h-4" />
-              Contact
-            </Link>
-          </nav>
+          {/* Desktop Navigation - Two Rows Layout */}
+          <div className="hidden md:flex flex-col items-end flex-1 ml-8">
+            {/* First Row - Main Categories */}
+            <div className="flex items-center gap-5 mb-1">
+              {firstRowCategories.map((cat) => {
+                const Icon = cat.icon
+                return (
+                  <Link 
+                    key={cat.name} 
+                    href={cat.href}
+                    className="flex items-center gap-1.5 text-sm hover:text-[#C8A75B] transition whitespace-nowrap"
+                  >
+                    <Icon className="w-4 h-4" />
+                    {cat.name}
+                  </Link>
+                )
+              })}
+            </div>
+            {/* Second Row - Remaining Categories + About/Contact */}
+            <div className="flex items-center gap-5">
+              {secondRowCategories.map((cat) => {
+                const Icon = cat.icon
+                return (
+                  <Link 
+                    key={cat.name} 
+                    href={cat.href}
+                    className="flex items-center gap-1.5 text-sm hover:text-[#C8A75B] transition whitespace-nowrap"
+                  >
+                    <Icon className="w-4 h-4" />
+                    {cat.name}
+                  </Link>
+                )
+              })}
+              <Link 
+                href="/about" 
+                className="flex items-center gap-2 text-sm hover:text-[#C8A75B] transition"
+              >
+                <Info className="w-4 h-4" />
+                About
+              </Link>
+              <Link 
+                href="/contact" 
+                className="flex items-center gap-2 text-sm hover:text-[#C8A75B] transition"
+              >
+                <Phone className="w-4 h-4" />
+                Contact
+              </Link>
+            </div>
+          </div>
 
-          {/* Cart & Mobile Menu Button */}
-          <div className="flex items-center gap-4">
+          {/* Cart & Mobile Menu Button - WITH GAP */}
+          <div className="flex items-center gap-6 shrink-0 ml-6">
             <Link href="/cart" className="text-sm font-medium relative">
               <ShoppingCart className="w-5 h-5" />
               {totalItems > 0 && (
@@ -93,8 +120,8 @@ export default function Navbar() {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <nav className="md:hidden py-4 border-t">
-            <div className="flex flex-col gap-4">
+          <nav className="md:hidden py-4 border-t max-h-[80vh] overflow-y-auto">
+            <div className="flex flex-col gap-3">
               {categories.map((cat) => {
                 const Icon = cat.icon
                 return (

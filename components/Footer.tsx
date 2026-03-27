@@ -2,15 +2,18 @@ import Link from "next/link"
 import Container from "./Container"
 import { Facebook, Instagram, Mail, Phone, MapPin } from "lucide-react"
 
-
 export default function Footer() {
   const currentYear = new Date().getFullYear()
   
   const productCategories = [
-    { name: "Portable Power", href: "/products?category=Portable%20Power" },
-    { name: "Home Backup", href: "/products?category=Home%20Backup" },
     { name: "Solar Panels", href: "/products?category=Solar%20Panels" },
-    { name: "Smart Tech", href: "/products?category=Smart%20Tech" },
+    { name: "Inverters & Controllers", href: "/products?category=Inverters%20%26%20Controllers" },
+    { name: "Batteries", href: "/products?category=Batteries" },
+    { name: "Portable Power", href: "/products?category=Portable%20Power%20Stations" },
+    { name: "Fans & Appliances", href: "/products?category=Fans%20%26%20Home%20Appliances" },
+    { name: "Solar Lighting", href: "/products?category=Solar%20Lighting" },
+    { name: "Tech Hub", href: "/products?category=Gadgets%20%26%20Accessories" },
+    { name: "Installation", href: "/products?category=Installation%20%26%20Security" },
   ]
 
   const companyLinks = [
@@ -23,10 +26,7 @@ export default function Footer() {
   return (
     <footer className="bg-[#0B0F19] text-white mt-20">
       <Container>
-        {/* Main Footer */}
         <div className="py-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-          
-          {/* Company Info */}
           <div>
             <div className="text-2xl font-bold mb-4 tracking-wide">
               THE GRID
@@ -44,7 +44,6 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Products */}
           <div>
             <h3 className="text-lg font-semibold mb-4 text-[#C8A75B]">Products</h3>
             <ul className="space-y-2">
@@ -61,7 +60,6 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Company */}
           <div>
             <h3 className="text-lg font-semibold mb-4 text-[#C8A75B]">Company</h3>
             <ul className="space-y-2">
@@ -78,7 +76,6 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Contact Info */}
           <div>
             <h3 className="text-lg font-semibold mb-4 text-[#C8A75B]">Contact</h3>
             <ul className="space-y-3">
@@ -98,7 +95,6 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Bottom Bar */}
         <div className="border-t border-gray-800 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-xs text-gray-500">
