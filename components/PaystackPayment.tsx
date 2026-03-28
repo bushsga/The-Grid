@@ -65,6 +65,7 @@ export default function PaystackPayment({
     text: `Pay ₦${amount.toLocaleString()}`,
     onSuccess: handleSuccess,
     onClose: handleClose,
+    callback_url: `${window.location.origin}/checkout/success`,
     className: "w-full bg-[#C8A75B] text-black py-3 font-medium hover:bg-[#b8964a] transition disabled:bg-gray-300"
   }
 
