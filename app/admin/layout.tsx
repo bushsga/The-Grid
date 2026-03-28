@@ -20,17 +20,28 @@ export default function AdminLayout({
   const isLoginPage = pathname === "/admin/login"
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user && !isLoginPage) {
-        router.push("/admin/login")
-      } else {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        // ✅ SET THE COOKIE FOR MIDDLEWARE
+        const token = await user.getIdToken()
+        document.cookie = `__session=${token}; path=/; max-age=3600; SameSite=Lax`
         setUser(user)
+      } else if (!user && !isLoginPage) {
+        // Clear cookie on logout
+        document.cookie = `__session=; path=/; max-age=0`
+        router.push("/admin/login")
       }
       setLoading(false)
     })
 
     return () => unsubscribe()
   }, [router, isLoginPage])
+
+  const handleLogout = async () => {
+    await auth.signOut()
+    document.cookie = `__session=; path=/; max-age=0`
+    router.push("/admin/login")
+  }
 
   if (loading) {
     return (
@@ -70,7 +81,7 @@ export default function AdminLayout({
                   <span className="hidden sm:inline">Orders</span>
                 </Link>
                 <button
-                  onClick={() => auth.signOut()}
+                  onClick={handleLogout}
                   className="flex items-center gap-2 hover:text-[#C8A75B] transition"
                 >
                   <LogOut className="w-4 h-4" />
