@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Menu, X, ShoppingCart, Sun, Zap, Battery, Power, Fan, Lightbulb, Smartphone, Shield, Info, Phone } from "lucide-react"
+import { 
+  Menu, X, ShoppingCart, Sun, Zap, Battery, Power, Fan, 
+  Lightbulb, Smartphone, Shield, Info, Phone, Package 
+} from "lucide-react"
 import Container from "./Container"
 import { useCart } from "@/context/CartContext"
 
@@ -66,7 +69,7 @@ export default function Navbar() {
                 )
               })}
             </div>
-            {/* Second Row - Remaining Categories + About/Contact */}
+            {/* Second Row - Remaining Categories + About/Contact + My Orders */}
             <div className="flex items-center gap-5">
               {secondRowCategories.map((cat) => {
                 const Icon = cat.icon
@@ -81,6 +84,13 @@ export default function Navbar() {
                   </Link>
                 )
               })}
+              <Link 
+                href="/my-orders" 
+                className="flex items-center gap-2 text-sm hover:text-[#C8A75B] transition"
+              >
+                <Package className="w-4 h-4" />
+                My Orders
+              </Link>
               <Link 
                 href="/about" 
                 className="flex items-center gap-2 text-sm hover:text-[#C8A75B] transition"
@@ -98,7 +108,7 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Cart & Mobile Menu Button - WITH GAP */}
+          {/* Cart & Mobile Menu Button */}
           <div className="flex items-center gap-6 shrink-0 ml-6">
             <Link href="/cart" className="text-sm font-medium relative">
               <ShoppingCart className="w-5 h-5" />
@@ -136,6 +146,14 @@ export default function Navbar() {
                   </Link>
                 )
               })}
+              <Link
+                href="/my-orders"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-3 p-2 hover:bg-gray-50 transition"
+              >
+                <Package className="w-5 h-5 text-[#C8A75B]" />
+                <span>My Orders</span>
+              </Link>
               <Link
                 href="/about"
                 onClick={() => setIsOpen(false)}

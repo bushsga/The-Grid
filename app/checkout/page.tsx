@@ -35,7 +35,7 @@ export default function CheckoutPage() {
     setFormData(prev => ({ ...prev, [name]: value }))
   }
 
-  // ✅ UPDATE PRODUCT STOCK
+  // Update product stock
   const updateProductStock = async (productId: string, quantityPurchased: number) => {
     try {
       const productRef = doc(db, "products", productId)
@@ -56,7 +56,7 @@ export default function CheckoutPage() {
     }
   }
 
-  // ✅ SAVE ORDER AND UPDATE STOCK
+  // Save order and update stock – returns the payment reference
   const saveOrderToFirebase = async (paymentReference: string) => {
     try {
       const orderData = {
@@ -77,26 +77,34 @@ export default function CheckoutPage() {
         updatedAt: new Date()
       }
 
-      // Save order
       await addDoc(collection(db, "orders"), orderData)
       console.log("✅ Order saved with reference:", paymentReference)
       
-      // ✅ UPDATE STOCK FOR EACH PRODUCT
+      // Update stock for each product
       for (const item of items) {
         await updateProductStock(item.product.id, item.quantity)
       }
       
-      // Clear cart
       clearCart()
       
+      // Return the reference so we can redirect
+      return paymentReference
     } catch (error) {
       console.error("❌ Error saving order:", error)
+      throw error
     }
   }
 
-  const handlePaymentSuccess = (response: any) => {
+  const handlePaymentSuccess = async (response: any) => {
     console.log("💰 Payment successful!", response)
-    saveOrderToFirebase(response.reference)
+    try {
+      const ref = await saveOrderToFirebase(response.reference)
+      // Redirect to success page with payment reference
+      window.location.href = `/checkout/success?paymentReference=${ref}`
+    } catch (error) {
+      console.error("Error after payment:", error)
+      alert("Order saved but could not redirect. Please check your email for confirmation.")
+    }
   }
 
   const handlePaymentClose = () => {

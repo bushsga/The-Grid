@@ -1,4 +1,3 @@
-// app/checkout/success/page.tsx
 "use client"
 
 import { Suspense } from "react"
@@ -10,7 +9,6 @@ import { useEffect, useState } from "react"
 import { db } from "@/lib/firebase"
 import { collection, query, where, getDocs, updateDoc } from "firebase/firestore"
 
-// Create a client component that uses useSearchParams
 function SuccessContent() {
   const [status, setStatus] = useState("loading")
   const searchParams = useSearchParams()
@@ -28,6 +26,11 @@ function SuccessContent() {
         const pendingStr = sessionStorage.getItem('pendingPayment')
         if (pendingStr) {
           const pending = JSON.parse(pendingStr)
+          
+          // Save email for My Orders
+          if (pending.customerEmail) {
+            localStorage.setItem('customerEmail', pending.customerEmail)
+          }
           
           const ordersRef = collection(db, "orders")
           const q = query(ordersRef, where("paymentReference", "==", pending.reference))
@@ -76,20 +79,28 @@ function SuccessContent() {
             Thank you for your purchase. Your cart has been cleared.
             {reference && <><br />Reference: <span className="font-mono">{reference}</span></>}
           </p>
+
+          {/* ✅ Buttons row */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-4">
+            <Link 
+              href="/my-orders"
+              className="bg-gray-100 text-gray-700 px-6 py-3 inline-block hover:bg-gray-200 transition"
+            >
+              View My Orders
+            </Link>
+            <Link 
+              href="/products"
+              className="bg-[#C8A75B] text-black px-6 py-3 inline-block hover:bg-[#b8964a] transition"
+            >
+              Continue Shopping
+            </Link>
+          </div>
         </>
       )}
-
-      <Link 
-        href="/products"
-        className="bg-[#C8A75B] text-black px-8 py-3 inline-block hover:bg-[#b8964a] transition"
-      >
-        Continue Shopping
-      </Link>
     </div>
   )
 }
 
-// Loading fallback
 function SuccessLoading() {
   return (
     <div className="max-w-2xl mx-auto text-center py-20">
@@ -101,7 +112,6 @@ function SuccessLoading() {
   )
 }
 
-// Main page component with Suspense boundary
 export default function CheckoutSuccess() {
   return (
     <main className="py-20 bg-white min-h-screen">
