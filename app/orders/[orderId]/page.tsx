@@ -6,7 +6,7 @@ import Container from "@/components/Container"
 import Link from "next/link"
 import { ArrowLeft, Package, Truck, CheckCircle, Clock, XCircle } from "lucide-react"
 import { getOrderById } from "@/lib/getOrders"
-import { updateDoc, doc } from "firebase/firestore"
+import { updateDoc, doc, getDoc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 
 export default function OrderDetailsPage() {
@@ -29,25 +29,45 @@ export default function OrderDetailsPage() {
     fetchOrder()
   }, [orderId])
 
-  const handleCancelOrder = async () => {
-    if (!confirm("Are you sure you want to cancel this order? This cannot be undone.")) return
-    
-    setCancelling(true)
-    try {
-      const orderRef = doc(db, "orders", orderId)
-      await updateDoc(orderRef, {
-        orderStatus: "cancelled",
-        updatedAt: new Date()
-      })
-      setOrder({ ...order, orderStatus: "cancelled" })
-      alert("Order cancelled successfully")
-    } catch (error) {
-      console.error("Error cancelling order:", error)
-      alert("Failed to cancel order")
-    } finally {
-      setCancelling(false)
+// In the handleCancelOrder function, add stock restoration
+const handleCancelOrder = async () => {
+  if (!confirm("Are you sure you want to cancel this order? This cannot be undone.")) return
+  
+  setCancelling(true)
+  try {
+    // 1️⃣ RESTORE STOCK FOR EACH PRODUCT
+    for (const item of order.items) {
+      const productRef = doc(db, "products", item.productId)
+      const productSnap = await getDoc(productRef)
+      
+      if (productSnap.exists()) {
+        const currentStock = productSnap.data().stock || 0
+        const newStock = currentStock + item.quantity // ✅ Add back the quantity
+        
+        await updateDoc(productRef, {
+          stock: newStock,
+          updatedAt: new Date()
+        })
+        console.log(`✅ Stock restored for ${item.productId}: ${currentStock} → ${newStock}`)
+      }
     }
+    
+    // 2️⃣ UPDATE ORDER STATUS
+    const orderRef = doc(db, "orders", orderId)
+    await updateDoc(orderRef, {
+      orderStatus: "cancelled",
+      updatedAt: new Date()
+    })
+    
+    setOrder({ ...order, orderStatus: "cancelled" })
+    alert("Order cancelled and stock restored successfully")
+  } catch (error) {
+    console.error("Error cancelling order:", error)
+    alert("Failed to cancel order")
+  } finally {
+    setCancelling(false)
   }
+}
 
   const getStatusIcon = (status: string) => {
     switch(status) {
