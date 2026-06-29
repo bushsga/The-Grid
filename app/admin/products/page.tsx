@@ -18,6 +18,8 @@ type Product = {
   stock: number
   brand: string
   imageUrl: string
+  powerItems?: Array<{ item: string; hours: string }>
+  specs?: Array<{ label: string; value: string }>
   createdAt?: any
 }
 
@@ -36,6 +38,11 @@ export default function ProductsPage() {
     stock: "",
     brand: ""
   })
+
+  // ✅ State for Power Items and Specs in edit modal
+  const [editPowerItems, setEditPowerItems] = useState<Array<{ item: string; hours: string }>>([])
+  const [editSpecs, setEditSpecs] = useState<Array<{ label: string; value: string }>>([])
+
   const router = useRouter()
 
   useEffect(() => {
@@ -47,7 +54,20 @@ export default function ProductsPage() {
       const querySnapshot = await getDocs(collection(db, "products"))
       const productsList: Product[] = []
       querySnapshot.forEach((doc) => {
-        productsList.push({ id: doc.id, ...doc.data() } as Product)
+        const data = doc.data()
+        productsList.push({
+          id: doc.id,
+          name: data.name,
+          price: data.price,
+          category: data.category,
+          description: data.description,
+          stock: data.stock,
+          brand: data.brand || "",
+          imageUrl: data.imageUrl || "",
+          powerItems: data.powerItems || [],
+          specs: data.specs || [],
+          createdAt: data.createdAt
+        } as Product)
       })
       setProducts(productsList)
     } catch (error) {
@@ -80,6 +100,8 @@ export default function ProductsPage() {
       stock: product.stock.toString(),
       brand: product.brand || ""
     })
+    setEditPowerItems(product.powerItems || [])
+    setEditSpecs(product.specs || [])
     setNewImageFile(null)
   }
 
@@ -94,16 +116,45 @@ export default function ProductsPage() {
     }
   }
 
+  // ✅ Power Items Handlers
+  const addEditPowerItem = () => {
+    setEditPowerItems([...editPowerItems, { item: "", hours: "" }])
+  }
+
+  const updateEditPowerItem = (index: number, field: "item" | "hours", value: string) => {
+    const updated = [...editPowerItems]
+    updated[index][field] = value
+    setEditPowerItems(updated)
+  }
+
+  const removeEditPowerItem = (index: number) => {
+    setEditPowerItems(editPowerItems.filter((_, i) => i !== index))
+  }
+
+  // ✅ Specs Handlers
+  const addEditSpec = () => {
+    setEditSpecs([...editSpecs, { label: "", value: "" }])
+  }
+
+  const updateEditSpec = (index: number, field: "label" | "value", value: string) => {
+    const updated = [...editSpecs]
+    updated[index][field] = value
+    setEditSpecs(updated)
+  }
+
+  const removeEditSpec = (index: number) => {
+    setEditSpecs(editSpecs.filter((_, i) => i !== index))
+  }
+
   const handleUpdateSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!editingProduct) return
-    
+
     setSaving(true)
 
     try {
       let imageUrl = editingProduct.imageUrl
-      
-      
+
       if (newImageFile) {
         setUploadingImage(true)
         const formData = new FormData()
@@ -135,9 +186,11 @@ export default function ProductsPage() {
         stock: Number(editForm.stock),
         brand: editForm.brand,
         imageUrl: imageUrl,
+        powerItems: editPowerItems.filter(p => p.item.trim() && p.hours.trim()),
+        specs: editSpecs.filter(s => s.label.trim() && s.value.trim()),
         updatedAt: new Date()
       })
-      
+
       setEditingProduct(null)
       setNewImageFile(null)
       fetchProducts()
@@ -160,295 +213,378 @@ export default function ProductsPage() {
 
   return (
     <AdminProtected>
-           <Container>
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-semibold">Products Management</h1>
-        <Link
-          href="/admin/products/add"
-          className="bg-[#C8A75B] text-black px-4 py-2 text-sm font-medium hover:bg-[#b8964a] flex items-center gap-2"
-        >
-          <Plus className="w-4 h-4" /> Add New
-        </Link>
-      </div>
-
-      {/* Edit Modal */}
-      {editingProduct && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto rounded-lg">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-semibold">Edit Product</h2>
-              <button
-                onClick={() => setEditingProduct(null)}
-                className="text-gray-500 hover:text-gray-700 text-xl"
-              >
-                ✕
-              </button>
-            </div>
-            
-            <form onSubmit={handleUpdateSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Product Name *</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={editForm.name}
-                  onChange={handleEditInputChange}
-                  required
-                  className="w-full border p-3 rounded-sm"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Price (₦) *</label>
-                  <input
-                    type="number"
-                    name="price"
-                    value={editForm.price}
-                    onChange={handleEditInputChange}
-                    required
-                    className="w-full border p-3 rounded-sm"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">Stock *</label>
-                  <input
-                    type="number"
-                    name="stock"
-                    value={editForm.stock}
-                    onChange={handleEditInputChange}
-                    required
-                    className="w-full border p-3 rounded-sm"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Category *</label>
-                <select
-                  name="category"
-                  value={editForm.category}
-                  onChange={handleEditInputChange}
-                  required
-                  className="w-full border p-3 rounded-sm"
-                >
-                  <option value="">Select category</option>
-                  <option value="Portable Power">Portable Power</option>
-                  <option value="Home Backup">Home Backup</option>
-                  <option value="Solar Panels">Solar Panels</option>
-                  <option value="Smart Tech">Smart Tech</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Brand</label>
-                <input
-                  type="text"
-                  name="brand"
-                  value={editForm.brand}
-                  onChange={handleEditInputChange}
-                  className="w-full border p-3 rounded-sm"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Description *</label>
-                <textarea
-                  name="description"
-                  value={editForm.description}
-                  onChange={handleEditInputChange}
-                  required
-                  rows={4}
-                  className="w-full border p-3 rounded-sm"
-                />
-              </div>
-
-              {/* Image Upload Section */}
-              <div>
-                <label className="block text-sm font-medium mb-1">Product Image</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="w-full border p-2 rounded-sm"
-                />
-                {editingProduct.imageUrl && (
-                  <div className="mt-2">
-                    <p className="text-sm text-gray-600 mb-1">Current Image:</p>
-                    <img 
-                      src={editingProduct.imageUrl} 
-                      alt={editingProduct.name}
-                      className="h-20 w-20 object-cover border"
-                    />
-                  </div>
-                )}
-                {uploadingImage && (
-                  <p className="text-sm text-blue-600 mt-1">Uploading new image...</p>
-                )}
-              </div>
-
-              <div className="flex gap-2 pt-4">
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="bg-[#C8A75B] text-black px-6 py-2 hover:bg-[#b8964a] transition disabled:bg-gray-300"
-                >
-                  {saving ? "Updating..." : "Update Product"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setEditingProduct(null)}
-                  className="border px-6 py-2 hover:bg-gray-100 transition"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Products Display */}
-      {products.length === 0 ? (
-        <div className="text-center py-20 bg-white">
-          <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-600 mb-4">No products yet</p>
+      <Container>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-semibold">Products Management</h1>
           <Link
             href="/admin/products/add"
-            className="text-[#C8A75B] underline"
+            className="bg-[#C8A75B] text-black px-4 py-2 text-sm font-medium hover:bg-[#b8964a] flex items-center gap-2"
           >
-            Add your first product
+            <Plus className="w-4 h-4" /> Add New
           </Link>
         </div>
-      ) : (
-        <div className="space-y-4">
-          {/* Mobile View - Cards */}
-          <div className="block md:hidden space-y-4">
-            {products.map((product) => (
-              <div key={product.id} className="bg-white p-4 shadow-sm rounded-sm">
-                <div className="flex gap-3">
-                  {/* Image */}
-                  <div className="w-16 h-16 bg-gray-100 flex-shrink-0 rounded overflow-hidden">
-                    {product.imageUrl ? (
-                      <img 
-                        src={product.imageUrl} 
-                        alt={product.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                        <Package className="w-5 h-5 text-gray-400" />
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Info */}
-                  <div className="flex-1">
-                    <h3 className="font-medium">{product.name}</h3>
-                    <p className="text-xs text-gray-500">{product.category}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-sm font-semibold">₦{product.price.toLocaleString()}</span>
-                      <span className={`text-xs px-2 py-1 rounded ${
-                        product.stock < 5 ? 'bg-red-100 text-red-600' : 
-                        product.stock < 10 ? 'bg-orange-100 text-orange-600' : 
-                        'bg-green-100 text-green-600'
-                      }`}>
-                        Stock: {product.stock}
-                      </span>
-                    </div>
-                  </div>
-                </div>
 
-                {/* Actions */}
-                <div className="flex gap-2 mt-3 pt-3 border-t">
-                  <button
-                    onClick={() => handleEdit(product)}
-                    className="flex items-center gap-1 text-blue-600 text-sm px-3 py-1 border rounded hover:bg-blue-50"
-                  >
-                    <Edit className="w-3 h-3" />
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(product.id)}
-                    className="flex items-center gap-1 text-red-600 text-sm px-3 py-1 border rounded hover:bg-red-50"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                    Delete
-                  </button>
-                </div>
+        {/* Edit Modal */}
+        {editingProduct && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto rounded-lg">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-semibold">Edit Product</h2>
+                <button
+                  onClick={() => setEditingProduct(null)}
+                  className="text-gray-500 hover:text-gray-700 text-xl"
+                >
+                  ✕
+                </button>
               </div>
-            ))}
-          </div>
 
-          {/* Desktop View - Table */}
-          <div className="hidden md:block bg-white shadow-sm overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b">
-                <tr>
-                  <th className="text-left p-4">Image</th>
-                  <th className="text-left p-4">Name</th>
-                  <th className="text-left p-4">Category</th>
-                  <th className="text-left p-4">Price</th>
-                  <th className="text-left p-4">Stock</th>
-                  <th className="text-left p-4">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {products.map((product) => (
-                  <tr key={product.id} className="border-b hover:bg-gray-50">
-                    <td className="p-4">
+              <form onSubmit={handleUpdateSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Product Name *</label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={editForm.name}
+                    onChange={handleEditInputChange}
+                    required
+                    className="w-full border p-3 rounded-sm"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Price (₦) *</label>
+                    <input
+                      type="number"
+                      name="price"
+                      value={editForm.price}
+                      onChange={handleEditInputChange}
+                      required
+                      className="w-full border p-3 rounded-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Stock *</label>
+                    <input
+                      type="number"
+                      name="stock"
+                      value={editForm.stock}
+                      onChange={handleEditInputChange}
+                      required
+                      className="w-full border p-3 rounded-sm"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Category *</label>
+                  <select
+                    name="category"
+                    value={editForm.category}
+                    onChange={handleEditInputChange}
+                    required
+                    className="w-full border p-3 rounded-sm"
+                  >
+                    <option value="">Select category</option>
+                    <option value="Solar Panels">Solar Panels</option>
+                    <option value="Inverters & Controllers">Inverters & Controllers</option>
+                    <option value="Batteries">Batteries</option>
+                    <option value="Portable Power Stations">Portable Power Stations</option>
+                    <option value="Fans & Home Appliances">Fans & Home Appliances</option>
+                    <option value="Solar Lighting">Solar Lighting</option>
+                    <option value="Gadgets & Accessories">Gadgets & Accessories</option>
+                    <option value="Installation & Security">Installation & Security</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Brand</label>
+                  <input
+                    type="text"
+                    name="brand"
+                    value={editForm.brand}
+                    onChange={handleEditInputChange}
+                    className="w-full border p-3 rounded-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Description *</label>
+                  <textarea
+                    name="description"
+                    value={editForm.description}
+                    onChange={handleEditInputChange}
+                    required
+                    rows={4}
+                    className="w-full border p-3 rounded-sm"
+                  />
+                </div>
+
+                {/* ✅ "What It Can Power" Section */}
+                <div>
+                  <label className="block text-sm font-medium mb-1">What It Can Power</label>
+                  <div className="space-y-2">
+                    {editPowerItems.map((item, index) => (
+                      <div key={index} className="flex gap-2 items-center">
+                        <input
+                          type="text"
+                          placeholder="Item (e.g., TV)"
+                          value={item.item}
+                          onChange={(e) => updateEditPowerItem(index, "item", e.target.value)}
+                          className="flex-1 border p-2 rounded-sm"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Hours"
+                          value={item.hours}
+                          onChange={(e) => updateEditPowerItem(index, "hours", e.target.value)}
+                          className="w-20 border p-2 rounded-sm"
+                        />
+                        <span className="text-sm">hrs</span>
+                        <button
+                          type="button"
+                          onClick={() => removeEditPowerItem(index)}
+                          className="p-2 text-red-500 hover:bg-red-50 rounded"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={addEditPowerItem}
+                      className="text-sm text-[#C8A75B] hover:underline"
+                    >
+                      + Add Power Item
+                    </button>
+                  </div>
+                </div>
+
+                {/* ✅ "Technical Specifications" Section */}
+                <div>
+                  <label className="block text-sm font-medium mb-1">Technical Specifications</label>
+                  <div className="space-y-2">
+                    {editSpecs.map((spec, index) => (
+                      <div key={index} className="flex gap-2 items-center">
+                        <input
+                          type="text"
+                          placeholder="Label (e.g., Battery Capacity)"
+                          value={spec.label}
+                          onChange={(e) => updateEditSpec(index, "label", e.target.value)}
+                          className="flex-1 border p-2 rounded-sm"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Value (e.g., 3600Wh)"
+                          value={spec.value}
+                          onChange={(e) => updateEditSpec(index, "value", e.target.value)}
+                          className="flex-1 border p-2 rounded-sm"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeEditSpec(index)}
+                          className="p-2 text-red-500 hover:bg-red-50 rounded"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={addEditSpec}
+                      className="text-sm text-[#C8A75B] hover:underline"
+                    >
+                      + Add Specification
+                    </button>
+                  </div>
+                </div>
+
+                {/* Image Upload Section */}
+                <div>
+                  <label className="block text-sm font-medium mb-1">Product Image</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="w-full border p-2 rounded-sm"
+                  />
+                  {editingProduct.imageUrl && (
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-600 mb-1">Current Image:</p>
+                      <img
+                        src={editingProduct.imageUrl}
+                        alt={editingProduct.name}
+                        className="h-20 w-20 object-cover border"
+                      />
+                    </div>
+                  )}
+                  {uploadingImage && (
+                    <p className="text-sm text-blue-600 mt-1">Uploading new image...</p>
+                  )}
+                </div>
+
+                <div className="flex gap-2 pt-4">
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="bg-[#C8A75B] text-black px-6 py-2 hover:bg-[#b8964a] transition disabled:bg-gray-300"
+                  >
+                    {saving ? "Updating..." : "Update Product"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditingProduct(null)}
+                    className="border px-6 py-2 hover:bg-gray-100 transition"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Products Display */}
+        {products.length === 0 ? (
+          <div className="text-center py-20 bg-white">
+            <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-600 mb-4">No products yet</p>
+            <Link href="/admin/products/add" className="text-[#C8A75B] underline">
+              Add your first product
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {/* Mobile View - Cards */}
+            <div className="block md:hidden space-y-4">
+              {products.map((product) => (
+                <div key={product.id} className="bg-white p-4 shadow-sm rounded-sm">
+                  <div className="flex gap-3">
+                    <div className="w-16 h-16 bg-gray-100 flex-shrink-0 rounded overflow-hidden">
                       {product.imageUrl ? (
-                        <img 
-                          src={product.imageUrl} 
+                        <img
+                          src={product.imageUrl}
                           alt={product.name}
-                          className="w-12 h-12 object-cover rounded"
+                          className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-12 h-12 bg-gray-200 rounded" />
+                        <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                          <Package className="w-5 h-5 text-gray-400" />
+                        </div>
                       )}
-                    </td>
-                    <td className="p-4 font-medium">{product.name}</td>
-                    <td className="p-4">{product.category}</td>
-                    <td className="p-4">₦{product.price.toLocaleString()}</td>
-                    <td className="p-4">
-                      <span className={`inline-block px-2 py-1 rounded text-xs ${
-                        product.stock < 5 ? 'bg-red-100 text-red-600 font-medium' : 
-                        product.stock < 10 ? 'bg-orange-100 text-orange-600' : 
-                        'bg-green-100 text-green-600'
-                      }`}>
-                        {product.stock} units
-                        {product.stock < 5 && (
-                          <span className="ml-2">⚠️ Low Stock!</span>
-                        )}
-                      </span>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleEdit(product)}
-                          className="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1"
+                    </div>
+
+                    <div className="flex-1">
+                      <h3 className="font-medium">{product.name}</h3>
+                      <p className="text-xs text-gray-500">{product.category}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-sm font-semibold">₦{product.price.toLocaleString()}</span>
+                        <span
+                          className={`text-xs px-2 py-1 rounded ${
+                            product.stock < 5
+                              ? "bg-red-100 text-red-600"
+                              : product.stock < 10
+                              ? "bg-orange-100 text-orange-600"
+                              : "bg-green-100 text-green-600"
+                          }`}
                         >
-                          <Edit className="w-3 h-3" />
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(product.id)}
-                          className="text-red-600 hover:text-red-800 text-sm flex items-center gap-1"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                          Delete
-                        </button>
+                          Stock: {product.stock}
+                        </span>
                       </div>
-                    </td>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 mt-3 pt-3 border-t">
+                    <button
+                      onClick={() => handleEdit(product)}
+                      className="flex items-center gap-1 text-blue-600 text-sm px-3 py-1 border rounded hover:bg-blue-50"
+                    >
+                      <Edit className="w-3 h-3" />
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(product.id)}
+                      className="flex items-center gap-1 text-red-600 text-sm px-3 py-1 border rounded hover:bg-red-50"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop View - Table */}
+            <div className="hidden md:block bg-white shadow-sm overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b">
+                  <tr>
+                    <th className="text-left p-4">Image</th>
+                    <th className="text-left p-4">Name</th>
+                    <th className="text-left p-4">Category</th>
+                    <th className="text-left p-4">Price</th>
+                    <th className="text-left p-4">Stock</th>
+                    <th className="text-left p-4">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {products.map((product) => (
+                    <tr key={product.id} className="border-b hover:bg-gray-50">
+                      <td className="p-4">
+                        {product.imageUrl ? (
+                          <img
+                            src={product.imageUrl}
+                            alt={product.name}
+                            className="w-12 h-12 object-cover rounded"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 bg-gray-200 rounded" />
+                        )}
+                      </td>
+                      <td className="p-4 font-medium">{product.name}</td>
+                      <td className="p-4">{product.category}</td>
+                      <td className="p-4">₦{product.price.toLocaleString()}</td>
+                      <td className="p-4">
+                        <span
+                          className={`inline-block px-2 py-1 rounded text-xs ${
+                            product.stock < 5
+                              ? "bg-red-100 text-red-600 font-medium"
+                              : product.stock < 10
+                              ? "bg-orange-100 text-orange-600"
+                              : "bg-green-100 text-green-600"
+                          }`}
+                        >
+                          {product.stock} units
+                          {product.stock < 5 && <span className="ml-2">⚠️ Low Stock!</span>}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleEdit(product)}
+                            className="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1"
+                          >
+                            <Edit className="w-3 h-3" />
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(product.id)}
+                            className="text-red-600 hover:text-red-800 text-sm flex items-center gap-1"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
-      )}
-    </Container>
+        )}
+      </Container>
     </AdminProtected>
   )
 }
