@@ -79,6 +79,20 @@ export default async function ProductDetails({ params }: Props) {
 
   if (!product) return notFound()
 
+  // 🔧 UPDATED: Based on your actual categories
+  // Installation Included - shows for Solar Panels, Inverters & Controllers, Batteries, Portable Power Stations
+  const installationCategories = [
+    "Solar Panels",
+    "Inverters & Controllers", 
+    "Batteries",
+    "Portable Power Stations"
+  ]
+  const showInstallation = installationCategories.includes(product.category)
+
+  // Power Items & Specs - ONLY for Portable Power Stations
+  const powerSpecCategories = ["Portable Power Stations"]
+  const showPowerAndSpecs = powerSpecCategories.includes(product.category)
+
   return (
     <main className="py-20 bg-white">
       <Container>
@@ -106,9 +120,12 @@ export default async function ProductDetails({ params }: Props) {
 
           {/* CONTENT - RIGHT SIDE */}
           <div className="md:w-1/2">
-            <div className="inline-block bg-[#C8A75B]/20 text-[#C8A75B] text-xs px-3 py-1 mb-4">
-              Installation Included
-            </div>
+            {/* 🔧 BUG #5 FIX: "Installation Included" - ONLY for specific categories */}
+            {showInstallation && (
+              <div className="inline-block bg-[#C8A75B]/20 text-[#C8A75B] text-xs px-3 py-1 mb-4">
+                Installation Included
+              </div>
+            )}
 
             <h1 className="text-4xl md:text-5xl font-semibold leading-tight mb-4">
               {product.name}
@@ -134,32 +151,37 @@ export default async function ProductDetails({ params }: Props) {
               )}
             </div>
 
-            {product.powerItems && product.powerItems.length > 0 && (
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold mb-3">What It Can Power</h3>
-                <div className="grid grid-cols-2 gap-3">
-                  {product.powerItems.map((item: any, index: number) => (
-                    <div key={index} className="border p-3 text-center">
-                      <div className="font-medium">{item.item}</div>
-                      <div className="text-sm text-gray-600">{item.hours} hrs</div>
+            {/* 🔧 BUG #3 FIX: "What It Can Power" and "Specs" - ONLY for Portable Power Stations */}
+            {showPowerAndSpecs && (
+              <>
+                {product.powerItems && product.powerItems.length > 0 && (
+                  <div className="mb-8">
+                    <h3 className="text-xl font-semibold mb-3">What It Can Power</h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      {product.powerItems.map((item: any, index: number) => (
+                        <div key={index} className="border p-3 text-center">
+                          <div className="font-medium">{item.item}</div>
+                          <div className="text-sm text-gray-600">{item.hours} hrs</div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
+                  </div>
+                )}
 
-            {product.specs && product.specs.length > 0 && (
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold mb-3">Technical Specifications</h3>
-                <div className="border divide-y">
-                  {product.specs.map((spec: any, index: number) => (
-                    <div key={index} className="flex justify-between p-3">
-                      <span className="font-medium">{spec.label}</span>
-                      <span className="text-gray-700">{spec.value}</span>
+                {product.specs && product.specs.length > 0 && (
+                  <div className="mb-8">
+                    <h3 className="text-xl font-semibold mb-3">Technical Specifications</h3>
+                    <div className="border divide-y">
+                      {product.specs.map((spec: any, index: number) => (
+                        <div key={index} className="flex justify-between p-3">
+                          <span className="font-medium">{spec.label}</span>
+                          <span className="text-gray-700">{spec.value}</span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </div>
+                  </div>
+                )}
+              </>
             )}
 
             <div className="mt-8">
